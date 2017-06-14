@@ -34,9 +34,8 @@ void setup()
 
     ModeUpdateAccount.begin();
     ModeCheckHC12.begin();
-    EspApConfigurator.begin();
-    switchMode(&ModeCheckHC12);
-//    switchMode(&ModeUpdateAccount);
+    EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
+    switchMode(&ModeUpdateAccount);
 
     // Enable web server in ModeWifiClient - this just makes testing
     // easier as I don't have to keep connecting to the AP to see
@@ -54,12 +53,10 @@ void loop()
     mode->update();
     if (mode->isFinished()) {
         if (mode == &ModeUpdateAccount) {
-            DBLN(F("Account has been updated, upload mode"));
             switchMode(&ModeCheckHC12);
         } else if (mode == &ModeCheckHC12) {
             DBLN("TODO: test OLED mode");
         }
     }
-    delay(100);
 }
 

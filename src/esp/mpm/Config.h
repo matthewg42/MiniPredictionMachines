@@ -11,4 +11,6 @@
 #define     HC12_BAUD       9600
 #define     OLED_SCK_PIN    CLK
 #define     OLED_SDA_PIN    SD0
+#define     HEARTBEAT_PIN   D0
+#define     HEARTBEAT_INV   true
 
