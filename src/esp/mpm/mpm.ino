@@ -6,9 +6,11 @@
 #include <PersistentSettingBool.h>
 #include <EspApConfigurator.h>
 #include <ModeWifiClient.h>
+#include <SoftwareSerial.h>
 #include "ModeUpdateAccount.h"
-#include "ModeSetTime.h"
+#include "ModeCheckHC12.h"
 //#include "ModeUploadData.h"
+#include "HC12Serial.h"
 #include "Config.h"
 
 Mode* mode = NULL;
@@ -27,17 +29,19 @@ void setup()
     delay(50);
     DBLN(F("\n\nS:setup"));
 
-    ModeUpdateAccount.begin();
-    ModeSetTime.begin();
-//    ModeUploadData.begin();
-    EspApConfigurator.begin();
+    HC12Serial.begin();
+    delay(200);
 
-    switchMode(&ModeUpdateAccount);
+    ModeUpdateAccount.begin();
+    ModeCheckHC12.begin();
+    EspApConfigurator.begin();
+    switchMode(&ModeCheckHC12);
+//    switchMode(&ModeUpdateAccount);
 
     // Enable web server in ModeWifiClient - this just makes testing
     // easier as I don't have to keep connecting to the AP to see
     // how the interface is being rendered...
-    ModeWifiClient.enableHttpServer(true);
+    //ModeWifiClient.enableHttpServer(true);
     EspApConfigurator.addSetting(SET_ACCT_UPD, new PersistentSettingBool(EspApConfigurator.nextFreeAddress(), false));
 
     DBLN(F("E:setup"));
@@ -50,11 +54,10 @@ void loop()
     mode->update();
     if (mode->isFinished()) {
         if (mode == &ModeUpdateAccount) {
-            DBLN(F("Account has been updated, setting time"));
-            switchMode(&ModeSetTime);
-        } else if (mode == &ModeSetTime) {
-            DBLN(F("Time set, uploading"));
-            // switchMode(&ModeUploadData);
+            DBLN(F("Account has been updated, upload mode"));
+            switchMode(&ModeCheckHC12);
+        } else if (mode == &ModeCheckHC12) {
+            DBLN("TODO: test OLED mode");
         }
     }
     delay(100);

@@ -2,16 +2,19 @@
 
 #include <Mode.h>
 
-class ModeSetTime_ : public Mode {
+class ModeCheckHC12_ : public Mode{
 public:
-    ModeSetTime_();
+    ModeCheckHC12_();
     void begin();
     void modeStart();
     void modeStop();
     void modeUpdate();
     bool isFinished();
 
+protected:
+    bool _testPassed;
+
 };
 
-extern ModeSetTime_ ModeSetTime;
+extern ModeCheckHC12_ ModeCheckHC12;
 
