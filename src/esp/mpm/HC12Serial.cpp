@@ -58,7 +58,7 @@ bool HC12Serial_::sendATCommand(const char* cmd)
     tx += '\n';
     dumpString("TX", tx);
     print(tx);
-    String rx = readString();
+    String rx = readStringUntil('\n');
     dumpString("RX", rx);
     if (!prevSetMode) { 
         setModeOff(); 
