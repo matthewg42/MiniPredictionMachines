@@ -47,11 +47,11 @@ void ModeRealTime_::modeUpdate()
 
     // If we managed to set time using NTP in the last NTP_REFRESH_PERIOD_S seconds
     // we don't need to do anything - just return
-    if (Millis() < _lastNtpSuccess + (NTP_REFRESH_PERIOD_S*1000)) {
+    if (Millis() < _lastNtpSuccess + (NTP_REFRESH_PERIOD_S*1000) && _lastNtpSuccess != 0) {
         return;
     }
 
-    if (Millis() > _lastNtpAttempt + (NTP_RETRY_PERIOD_S*1000)) {
+    if (Millis() >= _lastNtpAttempt + (NTP_RETRY_PERIOD_S*1000) || _lastNtpAttempt == 0) {
         ntpUpdate();
     }
 }
@@ -104,6 +104,7 @@ void ModeRealTime_::ntpUpdate()
 
 unsigned long ModeRealTime_::unixTime()
 {
+    if (_unixTime == 0) return 0;
     return _unixTime + ((Millis() - _lastNtpSuccess) / 1000);
 }
 
@@ -132,7 +133,7 @@ bool ModeRealTime_::dnsLookup()
 
 void ModeRealTime_::sendNtpPacket()
 {
-    DB(F("ModeRealTime::sendNtpPacket"));
+    DBLN(F("ModeRealTime::sendNtpPacket"));
 
     clearBuf();
 

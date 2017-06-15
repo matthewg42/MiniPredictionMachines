@@ -1,5 +1,6 @@
 #include <EspApConfigurator.h>
 #include "ModeCheckHC12.h"
+#include "ModeRealTime.h"
 #include "HC12Serial.h"
 #include "Config.h"
 
@@ -8,7 +9,7 @@ ModeCheckHC12_ ModeCheckHC12;
 ModeCheckHC12_::ModeCheckHC12_() 
 {
     // don't go nuts.
-    setUpdatePeriod(500);
+    setUpdatePeriod(1000);
 }
 
 void ModeCheckHC12_::begin()
@@ -31,6 +32,9 @@ void ModeCheckHC12_::modeUpdate()
 {
     DBLN(F("ModeCheckHC12::modeUpdate"));
     _testPassed = HC12Serial.checkComms();
+
+    DB(F("unix time is: "));
+    DBLN(ModeRealTime.unixTime());
 }
 
 bool ModeCheckHC12_::isFinished()
