@@ -7,7 +7,7 @@ public:
     const char* get() { return _id; }
 
 private:
-    char _id[16];
+    char _id[20];
 
 };
 
