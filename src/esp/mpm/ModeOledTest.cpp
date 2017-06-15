@@ -33,9 +33,7 @@ void ModeOledTest_::modeStop()
 
 void ModeOledTest_::modeUpdate()
 {
-    DBLN(F("ModeOledTest::modeUpdate"));
     _isDone = _counter > 30;
-
 
     _counter++;
 }
