@@ -4,6 +4,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <PersistentSettingBool.h>
+#include <PersistentSettingString.h>
 #include <EspApConfigurator.h>
 #include <ModeWifiClient.h>
 #include <SoftwareSerial.h>
@@ -19,7 +20,7 @@
 // Modes
 #include "ModeUpdateAccount.h"
 #include "ModeCheckHC12.h"
-#include "ModeOledTest.h"
+#include "ModeRealTime.h"
 //#include "ModeUploadData.h"
 
 // Other
@@ -53,7 +54,7 @@ void setup()
 
     ModeUpdateAccount.begin();
     ModeCheckHC12.begin();
-    ModeOledTest.begin();
+    ModeRealTime.begin();
     EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
     switchMode(&ModeUpdateAccount);
 
@@ -61,7 +62,8 @@ void setup()
     // easier as I don't have to keep connecting to the AP to see
     // how the interface is being rendered...
     //ModeWifiClient.enableHttpServer(true);
-    EspApConfigurator.addSetting(SET_ACCT_UPD, new PersistentSettingBool(EspApConfigurator.nextFreeAddress(), false));
+    EspApConfigurator.addSetting(SET_ACCT_UPD,   new PersistentSettingBool(EspApConfigurator.nextFreeAddress(), false));
+    EspApConfigurator.addSetting(SET_NTP_SERVER, new PersistentSettingString(EspApConfigurator.nextFreeAddress(), 64, "time.google.com"));
 
     DBLN(F("E:setup"));
 }
@@ -70,6 +72,7 @@ void loop()
 {
     // Give timeslice to components
     EspApConfigurator.update();
+    ModeRealTime.update();
     mode->update();
     SWDOWN.update();
 
@@ -81,9 +84,7 @@ void loop()
         if (mode == &ModeUpdateAccount) {
             switchMode(&ModeCheckHC12);
         } else if (mode == &ModeCheckHC12) {
-            switchMode(&ModeOledTest);
-        } else {
-            // TODO
+            // TODO: switch to upload mode
         }
     }
 }
