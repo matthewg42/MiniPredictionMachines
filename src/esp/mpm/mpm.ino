@@ -7,10 +7,22 @@
 #include <EspApConfigurator.h>
 #include <ModeWifiClient.h>
 #include <SoftwareSerial.h>
+#include <U8g2lib.h>
+#include <SPI.h>
+#include <Wire.h>
+
+// Physical devices
+#include "HC12Serial.h"
+#include "OLED.h"
+#include "SWDOWN.h"
+
+// Modes
 #include "ModeUpdateAccount.h"
 #include "ModeCheckHC12.h"
+#include "ModeOledTest.h"
 //#include "ModeUploadData.h"
-#include "HC12Serial.h"
+
+// Other
 #include "Config.h"
 
 Mode* mode = NULL;
@@ -25,15 +37,23 @@ void switchMode(Mode* newMode)
 
 void setup() 
 {
-    Serial.begin(115200);
+    DBBEGIN;
     delay(50);
     DBLN(F("\n\nS:setup"));
+
+    // Initialize OLED and choose a font
+    OLED.begin();
+    OLED.clearBuffer();
+    OLED.setFont(u8g2_font_unifont_t_latin);
 
     HC12Serial.begin();
     delay(200);
 
+    SWDOWN.begin();
+
     ModeUpdateAccount.begin();
     ModeCheckHC12.begin();
+    ModeOledTest.begin();
     EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
     switchMode(&ModeUpdateAccount);
 
@@ -51,11 +71,19 @@ void loop()
     // Give timeslice to components
     EspApConfigurator.update();
     mode->update();
+    SWDOWN.update();
+
+    // Debug button presses
+    if (SWDOWN.tapped()) { DBLN(F("DOWN Button pressed")); }
+
+    // Mode changes by them finishing
     if (mode->isFinished()) {
         if (mode == &ModeUpdateAccount) {
             switchMode(&ModeCheckHC12);
         } else if (mode == &ModeCheckHC12) {
-            DBLN("TODO: test OLED mode");
+            switchMode(&ModeOledTest);
+        } else {
+            // TODO
         }
     }
 }
