@@ -79,7 +79,7 @@ void ModeRealTime_::ntpUpdate()
     // Send a request
     sendNtpPacket();
 
-    // TODO: re-write this in a non-blocking way
+    // TODO: re-write this in a non-blocking way?
     uint32_t beginWait = millis();
     while (millis() - beginWait < 1500) {
         int size = _udp.parsePacket();
@@ -92,10 +92,16 @@ void ModeRealTime_::ntpUpdate()
             secsSince1900 |= (unsigned long)_buf[41] << 16;
             secsSince1900 |= (unsigned long)_buf[42] << 8;
             secsSince1900 |= (unsigned long)_buf[43];
-            _unixTime = secsSince1900 - 2208988800UL;
+            
+            unsigned long newUnix = secsSince1900 - 2208988800UL;
+            int diff = newUnix - unixTime();
+            _unixTime = newUnix;
             _lastNtpSuccess = Millis();
             DB(F("NTP success: "));
-            DBLN(_unixTime);
+            DB(_unixTime);
+            DB(F(" (diff="));
+            DB(diff);
+            DBLN(')');
             return;
         }
     }
