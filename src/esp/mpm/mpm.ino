@@ -24,6 +24,7 @@
 //#include "ModeUploadData.h"
 
 // Other
+#include "EspID.h"
 #include "Config.h"
 
 Mode* mode = NULL;
@@ -41,6 +42,11 @@ void setup()
     DBBEGIN;
     delay(50);
     DBLN(F("\n\nS:setup"));
+    
+    // Set ID based on mac address
+    EspID.begin();
+    DB(F("Device ID="));
+    DBLN(EspID.get());
 
     // Initialize OLED and choose a font
     OLED.begin();
@@ -48,7 +54,7 @@ void setup()
     OLED.setFont(u8g2_font_unifont_t_latin);
 
     HC12Serial.begin();
-    delay(200);
+    delay(100);
 
     SWDOWN.begin();
 
