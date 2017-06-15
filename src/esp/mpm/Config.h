@@ -15,6 +15,6 @@
 
 #define     SET_ACCT_UPD            F("Account Updated")
 #define     SET_NTP_SERVER          F("Time Server")
-#define     NTP_REFRESH_PERIOD_S    120
+#define     NTP_REFRESH_PERIOD_S    1800
 #define     NTP_RETRY_PERIOD_S      10
 
