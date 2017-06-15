@@ -1,0 +1,7 @@
+BUILD_EXTRA_FLAGS += -DDEBUG
+BUILD_EXTRA_FLAGS += -DDEBUG_OUTPUT=Serial
+BOARD = nodemcu
+UPLOAD_SPEED = 921600
+
+include ../esp.mk
+
