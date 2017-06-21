@@ -1,5 +1,8 @@
 #pragma once
 
+// Length is number of characters of expected ID, plus 1 for \0 string termination
+#define ESPID_LENGTH 6+1
+
 class EspID_ {
 public:
     EspID_() {;}
@@ -7,7 +10,7 @@ public:
     const char* get() { return _id; }
 
 private:
-    char _id[20];
+    char _id[ESPID_LENGTH];
 
 };
 
