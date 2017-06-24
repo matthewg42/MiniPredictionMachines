@@ -7,33 +7,24 @@
 #include <string.h>
 #include <stdint.h>
 
-// Temperature sensor
+// Includes used by other classes (must put here for Arduino IDE)
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+// Include our classes for the various components
 #include "HC12Serial.h"
 #include "MoistureSensor.h"
+#include "TemperatureSensor.h"
+
+// And general configuration like pins
 #include "Config.h"
 
 DebouncedButton SWA(SW_A_PIN);
 DebouncedButton SWB(SW_B_PIN);
 
-OneWire oneWire(TEMPERATURE_PIN);
-DallasTemperature DS18B20(&oneWire);
-
-float getTemperatureInC()
-{
-    DB("Reading temperature... ");
-    DS18B20.requestTemperatures();
-    float c = DS18B20.getTempCByIndex(0);
-    DB(c);
-    DBLN('C');
-    return c;
-}
-
 void sendData()
 {
-    float temperature = getTemperatureInC();
+    float temperature = TemperatureSensor.getCelcius();
     bool moisture = MoistureSensor.isMoist();
 
     DBLN("sendData():");
@@ -46,12 +37,13 @@ void setup()
 {
     Serial.begin(115200);
     DBLN(F("\n\nS:setup"));
+
+    // Init our classes for various sensors...
     SWA.begin();
     SWB.begin();
-    DS18B20.begin();
     MoistureSensor.begin();
-    pinMode(3, OUTPUT);
-    digitalWrite(3, HIGH);
+    TemperatureSensor.begin();
+
     DBLN(F("E:setup"));
 }
 
