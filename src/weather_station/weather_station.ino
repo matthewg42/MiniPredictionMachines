@@ -7,13 +7,28 @@
 #include <string.h>
 #include <stdint.h>
 
+// Temperature sensor
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
 #include "HC12Serial.h"
 #include "Config.h"
 
-// See Config.h for pins
-
 DebouncedButton SWA(SW_A_PIN);
 DebouncedButton SWB(SW_B_PIN);
+
+OneWire oneWire(TEMPERATURE_PIN);
+DallasTemperature DS18B20(&oneWire);
+
+float getTemperatureInC()
+{
+    DB("Reading temperature... ");
+    DS18B20.requestTemperatures();
+    float c = DS18B20.getTempCByIndex(0);
+    DB(c);
+    DBLN('C');
+    return c;
+}
 
 void setup()
 {
@@ -21,6 +36,7 @@ void setup()
     DBLN(F("\n\nS:setup"));
     SWA.begin();
     SWB.begin();
+    DS18B20.begin();
     pinMode(3, OUTPUT);
     digitalWrite(3, HIGH);
     DBLN(F("E:setup"));
@@ -32,7 +48,7 @@ void loop()
     SWB.update();
 
     if (SWA.tapped()) {
-        DBLN("SWA tap");
+        getTemperatureInC();
     }
     if (SWB.tapped()) {
         DBLN("SWB tap");
