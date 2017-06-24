@@ -1,11 +1,12 @@
 #include <Arduino.h>
+#include <avr/sleep.h>
 #include <MutilaDebug.h>
 #include <Mode.h>
 #include <SoftwareSerial.h>
-#include <DebouncedButton.h>
 #include <Millis.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
 // Includes used by other classes (must put here for Arduino IDE)
 #include <OneWire.h>
@@ -19,8 +20,13 @@
 // And general configuration like pins
 #include "Config.h"
 
-DebouncedButton SWA(SW_A_PIN);
-DebouncedButton SWB(SW_B_PIN);
+volatile bool flgWs;
+unsigned long prev = 0;
+
+void wsInt()
+{
+    flgWs = true;
+}
 
 void sendData()
 {
@@ -33,30 +39,48 @@ void sendData()
 
 }
 
+void goSleep()
+{
+    DBLN("goSleep");
+    // let serial finish
+    delay(30);
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable(); 
+    sleep_mode();  
+
+    // When the device wakes up, it resumes execution here
+    sleep_disable(); 
+    // let serial start
+    delay(30);
+}
+
 void setup()
 {
     Serial.begin(115200);
     DBLN(F("\n\nS:setup"));
 
-    // Init our classes for various sensors...
-    SWA.begin();
-    SWB.begin();
     MoistureSensor.begin();
     TemperatureSensor.begin();
+
+    pinMode(WINDSPEED_PIN, INPUT_PULLUP);
+    attachInterrupt(0, wsInt, RISING);
 
     DBLN(F("E:setup"));
 }
 
 void loop()
 {
-    SWA.update();
-    SWB.update();
-
-    if (SWA.tapped()) {
-        sendData();
+    DBLN("S:loop");
+    if (flgWs) {
+        flgWs = false;
+        unsigned long m = Millis();
+        DB("WS ");
+        DB(m);
+        DB(' ');
+        DBLN(m-prev);
+        prev = m;
     }
-    if (SWB.tapped()) {
-        DBLN("SWB tap");
-    }
+    goSleep();
+    DBLN("E:loop");
 }
 
