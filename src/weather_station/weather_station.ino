@@ -12,6 +12,7 @@
 #include <DallasTemperature.h>
 
 #include "HC12Serial.h"
+#include "MoistureSensor.h"
 #include "Config.h"
 
 DebouncedButton SWA(SW_A_PIN);
@@ -30,6 +31,17 @@ float getTemperatureInC()
     return c;
 }
 
+void sendData()
+{
+    float temperature = getTemperatureInC();
+    bool moisture = MoistureSensor.isMoist();
+
+    DBLN("sendData():");
+    DB("  temperature = "); DB(temperature); DBLN('C');
+    DB("  moisture    = "); DBLN(moisture);
+
+}
+
 void setup()
 {
     Serial.begin(115200);
@@ -37,6 +49,7 @@ void setup()
     SWA.begin();
     SWB.begin();
     DS18B20.begin();
+    MoistureSensor.begin();
     pinMode(3, OUTPUT);
     digitalWrite(3, HIGH);
     DBLN(F("E:setup"));
@@ -48,7 +61,7 @@ void loop()
     SWB.update();
 
     if (SWA.tapped()) {
-        getTemperatureInC();
+        sendData();
     }
     if (SWB.tapped()) {
         DBLN("SWB tap");
