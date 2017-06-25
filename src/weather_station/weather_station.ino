@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <avr/sleep.h>
 #include <avr/power.h>
+#include <avr/wdt.h>
 #include <MutilaDebug.h>
 #include <Mode.h>
 #include <SoftwareSerial.h>
@@ -29,9 +30,8 @@ volatile bool flgTim = false;
 unsigned long count = 0;
 volatile unsigned long debounceStart = 0;
 
-ISR(TIMER1_OVF_vect)
+ISR(WDT_vect)
 {
-    TCNT1 = TIMER_MAX;          // reset counter
     flgTim = true;
 }
 
@@ -58,24 +58,12 @@ void sendData()
 void goSleep()
 {
     DBLN("goSleep");
-    // let serial finish
-    delay(30);
+    delay(10);
 
-    // Select sleep mode.  To have a wakeup timer, we have to use the least 
-    // of the sleep modes: IDLE
-    set_sleep_mode(SLEEP_MODE_IDLE);
-
-    sleep_enable();
-
-    // Disable unused peripherals to save more power
-    power_adc_disable();
-    power_spi_disable();
-    power_timer0_disable();
-    power_timer2_disable();
-    power_twi_disable();  
-
-    // Goodnight Arduino
-    sleep_mode();
+    // Select sleep mode.  Here using most power-saving mode
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+    sleep_enable();     // ready, set...
+    sleep_mode();       // sleep
 
     // Wake up here. What day it is?
     sleep_disable(); 
@@ -84,7 +72,7 @@ void goSleep()
     power_all_enable();
 
     // Let serial start
-    delay(30);
+    delay(10);
 }
 
 void setup()
@@ -102,11 +90,19 @@ void setup()
     // Interrupt for windspeed pulses
     attachInterrupt(0, intHandler, RISING);
 
-    // Timer interrupt
-    TCCR1A = 0;
-    TCNT1  = 0; 
-    TCCR1B = 0x05;  // prescaler for 1:1024, giving us a timeout of 4.09 seconds.
-    TIMSK1 = 0x01;  // enable timer and overflow interrupt
+    // Watchdog timer setup
+    MCUSR &= ~(1<<WDRF); // Clear the reset flag
+  
+    /* In order to change WDE or the prescaler, we need to
+     * set WDCE (This will allow updates for 4 clock cycles).
+     */
+    WDTCSR |= (1<<WDCE) | (1<<WDE);
+
+    // set prescaler so delay is 2 sec
+    WDTCSR = (0<<WDP0) | (1<<WDP1) | (1<<WDP2) | (1<<WDP3); 
+
+    // Enable the WD interrupt (no reset)
+    WDTCSR |= _BV(WDIE);
 
     // enable those interrupts
     interrupts();
@@ -119,7 +115,7 @@ void loop()
     if (flgWs) {
         flgWs = false;
         unsigned long m = Millis();
-        DB("WS ");
+        DB(F("WS "));
         DB(count++);
         DB(" ");
         DBLN(m);
@@ -128,11 +124,8 @@ void loop()
     if (flgTim) {
         flgTim = false;
         unsigned long m = Millis();
-        DB("WS ");
-        DB(count++);
-        DB(" ");
+        DB(F("WD "));
         DBLN(m);
-        DBLN(F("Timer interrupt triggered"));
     }
 
     goSleep();
