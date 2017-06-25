@@ -98,8 +98,8 @@ void setup()
      */
     WDTCSR |= (1<<WDCE) | (1<<WDE);
 
-    // set prescaler so delay is 2 sec
-    WDTCSR = (0<<WDP0) | (1<<WDP1) | (1<<WDP2) | (1<<WDP3); 
+    // set prescaler (2 seconds)
+    WDTCSR = (0<<WDP3) | (1<<WDP2) | (1<<WDP1) | (1<<WDP0); 
 
     // Enable the WD interrupt (no reset)
     WDTCSR |= _BV(WDIE);
