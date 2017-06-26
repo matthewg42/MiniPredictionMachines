@@ -55,11 +55,17 @@ void sendData()
     float temperature = TemperatureSensor.getCelcius();
     bool moisture = MoistureSensor.isMoist();
 
-    Serial.println(F("sendData():"));
-    Serial.print(F("  temperature = ")); Serial.print(temperature); Serial.println('C');
-    Serial.print(F("  moisture    = ")); Serial.println(moisture);
-    Serial.print(F("  wind pulses = ")); Serial.println(WindspeedSensor.readPulses());
-    Serial.print(F("  rain pulses = ")); Serial.println(RainfallSensor.readPulses());
+    Serial.print(F("sendData() @ millis=")); 
+    Serial.println(millis());
+    Serial.print(F("  temperature = ")); 
+    Serial.print(temperature); 
+    Serial.println('C');
+    Serial.print(F("  moisture    = ")); 
+    Serial.println(moisture);
+    Serial.print(F("  wind pulses = ")); 
+    Serial.println(WindspeedSensor.readPulses());
+    Serial.print(F("  rain pulses = ")); 
+    Serial.println(RainfallSensor.readPulses());
 }
 
 void goSleep()
@@ -128,12 +134,16 @@ void loop()
 
     if (flgRainfall) {
         flgRainfall = false;
-        if (rainfallDebounceCounter == 0) {
-            DBLN(F("rain pulse"));
-            RainfallSensor.addPulse();
-            rainfallDebounceCounter = RAINFALL_DEBOUNCE_COUNT;
+        if (millis() < 100) {
+            DBLN(F("Discard spurious rain pulse on reset"));
         } else {
-            DBLN(F("rain pulse (discard bounce)"));
+            if (rainfallDebounceCounter == 0) {
+                DBLN(F("rain pulse"));
+                RainfallSensor.addPulse();
+                rainfallDebounceCounter = RAINFALL_DEBOUNCE_COUNT;
+            } else {
+                DBLN(F("rain pulse (discard bounce)"));
+            }
         }
     }
 
