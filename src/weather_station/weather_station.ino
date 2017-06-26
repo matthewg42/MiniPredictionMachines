@@ -25,10 +25,10 @@
 #include "Config.h"
 
 // Macros for turning on and off pin interrupts
-#define WIND_INT_ON  attachInterrupt(WINDSPEED_SENSOR_INT_ID, windspeedIntHandler, FALLING)
-#define RAIN_INT_ON  attachInterrupt(RAINFALL_SENSOR_INT_ID,  rainfallIntHandler,  RISING)
-#define WIND_INT_OFF detachInterrupt(WINDSPEED_SENSOR_INT_ID)
-#define RAIN_INT_OFF detachInterrupt(RAINFALL_SENSOR_INT_ID)
+#define WIND_INT_ON  attachInterrupt(digitalPinToInterrupt(WINDSPEED_PIN), windspeedIntHandler, FALLING)
+#define RAIN_INT_ON  attachInterrupt(digitalPinToInterrupt(RAINFALL_PIN), rainfallIntHandler, FALLING)
+#define WIND_INT_OFF detachInterrupt(digitalPinToInterrupt(WINDSPEED_PIN))
+#define RAIN_INT_OFF detachInterrupt(digitalPinToInterrupt(RAINFALL_PIN))
 
 // Flags which will set from interrupt handlers (these need the volatile keyword)
 volatile bool flgWindspeed = false;

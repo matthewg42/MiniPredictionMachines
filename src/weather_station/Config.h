@@ -31,10 +31,6 @@
 #define SDA_PIN                 A4
 #define SCLK_PIN                A5
 
-// Misc other settings and constants
-#define WINDSPEED_SENSOR_INT_ID 0
-#define RAINFALL_SENSOR_INT_ID  1
-
 // Tune this based on measuements from an external device with an 
 // accurate clock. It's not going to be perfect because the clock
 // in the nano is no temperature stabalized - we will just do our
