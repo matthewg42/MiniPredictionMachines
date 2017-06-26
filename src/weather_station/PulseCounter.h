@@ -16,6 +16,7 @@ public:
 
     //! Read pulse counter (and zero it)
     uint16_t readPulses();
+    uint16_t peek();
 
 private:
     uint8_t _pin;

@@ -25,6 +25,11 @@ uint16_t PulseCounter::readPulses()
     return c;
 }
 
+uint16_t PulseCounter::peek()
+{
+    return _pulseCount;
+}
+
 void PulseCounter::reset()
 {
     _pulseCount = 0;
