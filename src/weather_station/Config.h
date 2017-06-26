@@ -40,4 +40,5 @@
 // How many seconds between calling sendData()
 #define SEND_DATA_PERIOD_SEC    5
 
+#define RAINFALL_DEBOUNCE_COUNT 2
 

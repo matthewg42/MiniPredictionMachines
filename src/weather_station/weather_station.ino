@@ -24,17 +24,11 @@
 // And general configuration like pins
 #include "Config.h"
 
-// Macros for turning on and off pin interrupts
-#define WIND_INT_ON  attachInterrupt(digitalPinToInterrupt(WINDSPEED_PIN), windspeedIntHandler, FALLING)
-#define RAIN_INT_ON  attachInterrupt(digitalPinToInterrupt(RAINFALL_PIN), rainfallIntHandler, FALLING)
-#define WIND_INT_OFF detachInterrupt(digitalPinToInterrupt(WINDSPEED_PIN))
-#define RAIN_INT_OFF detachInterrupt(digitalPinToInterrupt(RAINFALL_PIN))
-
 // Flags which will set from interrupt handlers (these need the volatile keyword)
 volatile bool flgWindspeed = false;
 volatile bool flgRainfall = false;
 volatile bool flgTimer = false;
-volatile uint8_t rainfallEnableCounter = 0;
+uint8_t rainfallDebounceCounter = 0;
 
 // Other globals
 uint8_t wakeupCounter = 0;
@@ -48,7 +42,6 @@ ISR(WDT_vect)
 void rainfallIntHandler()
 {
     flgRainfall = true;
-    rainfallEnableCounter = 2;
 }
 
 void windspeedIntHandler()
@@ -62,11 +55,11 @@ void sendData()
     float temperature = TemperatureSensor.getCelcius();
     bool moisture = MoistureSensor.isMoist();
 
-    DBLN(F("sendData():"));
-    DB(F("  temperature = ")); DB(temperature); DBLN('C');
-    DB(F("  moisture    = ")); DBLN(moisture);
-    DB(F("  wind pulses = ")); DBLN(WindspeedSensor.readPulses());
-    DB(F("  rain pulses = ")); DBLN(RainfallSensor.readPulses());
+    Serial.println(F("sendData():"));
+    Serial.print(F("  temperature = ")); Serial.print(temperature); Serial.println('C');
+    Serial.print(F("  moisture    = ")); Serial.println(moisture);
+    Serial.print(F("  wind pulses = ")); Serial.println(WindspeedSensor.readPulses());
+    Serial.print(F("  rain pulses = ")); Serial.println(RainfallSensor.readPulses());
 }
 
 void goSleep()
@@ -103,9 +96,8 @@ void setup()
     noInterrupts(); // disable interrupts while we're setting up handlers
 
     // Interrupts for pulses which come in from windspeed and rainfall sensors
-    // these are macros which are #defined above
-    WIND_INT_ON;
-    RAIN_INT_ON;
+    attachInterrupt(digitalPinToInterrupt(WINDSPEED_PIN), windspeedIntHandler, FALLING);
+    attachInterrupt(digitalPinToInterrupt(RAINFALL_PIN), rainfallIntHandler, FALLING);
 
     // Watchdog timer setup
     MCUSR &= ~(1<<WDRF); // Clear the reset flag
@@ -135,23 +127,23 @@ void loop()
     }
 
     if (flgRainfall) {
-        DBLN(F("rain pulse (start debounce)"));
-        RAIN_INT_OFF;
         flgRainfall = false;
-        RainfallSensor.addPulse();
+        if (rainfallDebounceCounter == 0) {
+            DBLN(F("rain pulse"));
+            RainfallSensor.addPulse();
+            rainfallDebounceCounter = RAINFALL_DEBOUNCE_COUNT;
+        } else {
+            DBLN(F("rain pulse (discard bounce)"));
+        }
     }
 
     if (flgTimer) {
         flgTimer = false;
         wakeupCounter++;
 
-        // Decide if it's time to re-enable the rainfall interrupt handler
-        if (rainfallEnableCounter > 0) {
-            rainfallEnableCounter--;
-            if (rainfallEnableCounter == 0) {
-                DBLN(F("end rain debounce"));
-                RAIN_INT_ON;
-            }
+        // decremement the debounce counter
+        if (rainfallDebounceCounter > 0) {
+            rainfallDebounceCounter--;
         }
 
         if ((wakeupCounter*WDT_PERIOD_MS) > (SEND_DATA_PERIOD_SEC*1000)) {

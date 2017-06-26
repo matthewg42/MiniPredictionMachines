@@ -10,7 +10,7 @@ PulseCounter::PulseCounter(uint8_t pin, uint8_t pinMode) :
 
 void PulseCounter::begin() 
 { 
-    pinMode(_pin, INPUT_PULLUP); 
+    pinMode(_pin, _pinMode); 
 }
 
 void PulseCounter::addPulse() 
