@@ -1,16 +1,15 @@
 #include "PulseCounter.h"
 #include "Config.h"
 
-PulseCounter::PulseCounter(uint8_t pin, uint8_t pinMode) : 
-    _pin(pin),
-    _pinMode(pinMode)
+PulseCounter::PulseCounter(uint8_t pin) : 
+    _pin(pin)
 {
     reset();
 }
 
-void PulseCounter::begin() 
+void PulseCounter::begin(uint8_t pinModeSetting) 
 { 
-    pinMode(_pin, _pinMode); 
+    pinMode(_pin, pinModeSetting); 
 }
 
 void PulseCounter::addPulse() 

@@ -6,10 +6,10 @@
 class PulseCounter {
 public:
     //! Constructor
-    PulseCounter(uint8_t pin, uint8_t pinMode=INPUT_PULLUP);
+    PulseCounter(uint8_t pin);
 
     //! Initialize pin
-    void begin();
+    void begin(uint8_t pinModeSetting=INPUT_PULLUP);
 
     //! Increment the counter
     void addPulse();
@@ -20,7 +20,6 @@ public:
 
 private:
     uint8_t _pin;
-    uint8_t _pinMode;
     uint16_t _pulseCount;
 
     void reset();
