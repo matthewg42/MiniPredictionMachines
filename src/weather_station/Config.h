@@ -32,6 +32,9 @@ const uint8_t RX_SOFT2_PIN              = A3;
 const uint8_t SDA_PIN                   = A4;
 const uint8_t SCLK_PIN                  = A5;
 
+// Comms speed for HC12 device
+const uint32_t HC12_BAUD                = 9600;
+
 // Tune this based on measuements from an external device with an 
 // accurate clock. It's not going to be perfect because the clock
 // in the nano is not temperature stabalized - we will just do our
@@ -41,9 +44,13 @@ const uint16_t WDT_PERIOD_MS            = 500;
 // How many seconds between calling sendData()
 const uint8_t SEND_DATA_PERIOD_SEC      = 5;
 
+// How many seconds to save a chunk of rain data
+const uint8_t RAIN_SAVE_PERIOD_SEC      = 60;
 const uint8_t RAINFALL_DEBOUNCE_COUNT   = 2;
 
 // Windspeed calibration. We use a constant to prevent any doubt about
 // casting in the formula
 const float WINSPEED_MS_PER_HZ          = 0.7;
 
+// See doc/RainfallCalibration.md for how this was computed
+const float RAINFALL_MM_PER_PULSE       = 0.319951;

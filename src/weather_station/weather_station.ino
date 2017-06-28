@@ -31,7 +31,10 @@ volatile bool flgTimer = false;
 uint8_t rainfallDebounceCounter = 0;
 
 // Other globals
-uint8_t wakeupCounter = 0;
+uint32_t wakeupCounter = 0;
+uint32_t lastSend = 0;
+uint32_t lastRainMinute = 0;
+uint32_t sendSeqNo = 0;
 
 // Interrupt handlers
 ISR(WDT_vect)
@@ -52,20 +55,18 @@ void windspeedIntHandler()
 // Regular functions
 void sendData()
 {
-    float temperature = TemperatureSensor.getCelcius();
-    bool moisture = MoistureSensor.isMoist();
-
-    Serial.print(F("sendData() @ millis=")); 
-    Serial.println(millis());
-    Serial.print(F("  temperature = ")); 
-    Serial.print(temperature); 
-    Serial.println('C');
-    Serial.print(F("  moisture    = ")); 
-    Serial.println(moisture);
-    Serial.print(F("  wind pulses = ")); 
-    Serial.println(WindspeedSensor.readPulses());
-    Serial.print(F("  rain pulses = ")); 
-    Serial.println(RainfallSensor.readPulses());
+    sendSeqNo++;
+    String buf;
+    buf += "SQ=";   buf += sendSeqNo;
+    buf += " TE=";   buf += TemperatureSensor.getCelcius();
+    buf += " MO=";   buf += MoistureSensor.isMoist();
+    buf += " WS=";   buf += calculateWindspeedMs(WindspeedSensor.readPulses(), wakeupCounter*WDT_PERIOD_MS);
+    buf += " RM=";   buf += RainfallSensor.rainfallLastMinute();
+    buf += " RH=";   buf += RainfallSensor.rainfallLastHour();
+    buf += " DC=";   buf += ((float)millis()/(wakeupCounter*WDT_PERIOD_MS));
+    buf += " CS=";   buf += 0;
+    Serial.println(buf);
+    HC12Serial.println(buf);
 }
 
 void goSleep()
@@ -93,6 +94,8 @@ void setup()
 {
     Serial.begin(115200);
     DBLN(F("\n\nS:setup"));
+
+    HC12Serial.begin(HC12_BAUD);
 
     MoistureSensor.begin();
     TemperatureSensor.begin();
@@ -150,14 +153,22 @@ void loop()
     if (flgTimer) {
         flgTimer = false;
         wakeupCounter++;
+        DB(F("wakeup #"));
+        DBLN(wakeupCounter);
+        uint32_t realMillis = wakeupCounter*WDT_PERIOD_MS;
 
         // decremement the debounce counter
         if (rainfallDebounceCounter > 0) {
             rainfallDebounceCounter--;
         }
 
-        if ((wakeupCounter*WDT_PERIOD_MS) > (SEND_DATA_PERIOD_SEC*1000)) {
-            wakeupCounter = 0;
+        if (realMillis >= lastRainMinute + ((uint32_t)RAIN_SAVE_PERIOD_SEC*1000)) {
+            lastRainMinute = realMillis;
+            RainfallSensor.addPulseMinute();
+        }
+
+        if (realMillis >= lastSend + ((uint32_t)SEND_DATA_PERIOD_SEC*1000)) {
+            lastSend = realMillis;
             sendData();
         }
     }
