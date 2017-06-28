@@ -70,8 +70,6 @@ void sendData()
     // Send data three times to allow for wakeup times and so on
     for (uint8_t i=0; i<3; i++) {
         HC12Serial.println(buf);
-        HC12Serial.println();
-        HC12Serial.println();
         delay(10);
     }
 }

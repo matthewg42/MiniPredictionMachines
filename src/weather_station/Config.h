@@ -42,7 +42,7 @@ const uint32_t HC12_BAUD                = 9600;
 const uint16_t WDT_PERIOD_MS            = 500;
 
 // How many seconds between calling sendData()
-const uint8_t SEND_DATA_PERIOD_SEC      = 5;
+const uint8_t SEND_DATA_PERIOD_SEC      = 15;
 
 // How many seconds to save a chunk of rain data
 const uint8_t RAIN_SAVE_PERIOD_SEC      = 60;
