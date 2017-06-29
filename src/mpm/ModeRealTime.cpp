@@ -43,8 +43,6 @@ void ModeRealTime_::modeStop()
 
 void ModeRealTime_::modeUpdate()
 {
-    DBLN(F("ModeRealTime::modeUpdate"));
-
     // If we managed to set time using NTP in the last NTP_REFRESH_PERIOD_S seconds
     // we don't need to do anything - just return
     if (Millis() < _lastNtpSuccess + (NTP_REFRESH_PERIOD_S*1000) && _lastNtpSuccess != 0) {

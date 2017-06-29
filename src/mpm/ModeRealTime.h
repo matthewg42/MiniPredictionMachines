@@ -8,6 +8,8 @@
 #define NTP_PACKET_SIZE     48
 
 //! \brief A real time class - set by NTP
+//! * Fetches time and dat via NTP.
+//! * Periodcally synchronizes local clock by NTP
 class ModeRealTime_ : public Mode {
 public:
     enum State {

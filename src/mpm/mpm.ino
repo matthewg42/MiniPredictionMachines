@@ -18,24 +18,13 @@
 #include "SWDOWN.h"
 
 // Modes
-#include "ModeUpdateAccount.h"
-#include "ModeCheckHC12.h"
+#include "ModeWeather.h"
 #include "ModeRealTime.h"
 //#include "ModeUploadData.h"
 
 // Other
 #include "EspID.h"
 #include "Config.h"
-
-Mode* mode = NULL;
-
-void switchMode(Mode* newMode)
-{
-    if (newMode == mode) { return; }
-    if (mode) { mode->stop(); }
-    mode = newMode;
-    if (newMode) { mode->start(); }
-}
 
 void setup() 
 {
@@ -58,11 +47,9 @@ void setup()
 
     SWDOWN.begin();
 
-    ModeUpdateAccount.begin();
-    ModeCheckHC12.begin();
     ModeRealTime.begin();
+    ModeWeather.begin();
     EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
-    switchMode(&ModeUpdateAccount);
 
     // Enable web server in ModeWifiClient - this just makes testing
     // easier as I don't have to keep connecting to the AP to see
@@ -79,19 +66,6 @@ void loop()
     // Give timeslice to components
     EspApConfigurator.update();
     ModeRealTime.update();
-    mode->update();
-    SWDOWN.update();
-
-    // Debug button presses
-    if (SWDOWN.tapped()) { DBLN(F("DOWN Button pressed")); }
-
-    // Mode changes by them finishing
-    if (mode->isFinished()) {
-        if (mode == &ModeUpdateAccount) {
-            switchMode(&ModeCheckHC12);
-        } else if (mode == &ModeCheckHC12) {
-            // TODO: switch to upload mode
-        }
-    }
+    ModeWeather.update();
 }
 
