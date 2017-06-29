@@ -14,32 +14,49 @@ RainfallSensorClass::RainfallSensorClass(uint8_t pin) :
 
 void RainfallSensorClass::addPulseMinute()
 {
-    Serial.println(F("RainfallSensorClass::addPulseMinute"));
+    DBLN(F("RainfallSensorClass::addPulseMinute"));
     pulseHistory[ptr] = readPulses();
     ptr = (ptr + 1) % MINUTES_TO_RECORD;
     if (count < MINUTES_TO_RECORD) count++;
 }
 
-float RainfallSensorClass::rainfallLastMinute()
+uint16_t RainfallSensorClass::pulsesMinutes(uint16_t minutes)
 {
-    // In the first minute of operation, return how many pulses so far...
-    if (count == 0) { return peek()*RAINFALL_MM_PER_PULSE; }
-
-    // case 1: we have some number of values in the buffer
-    // fetch the value at ptr-1 (wrapping if ptr==0)
-    return pulseHistory[ptr>0 ? ptr-1 : MINUTES_TO_RECORD-1] * RAINFALL_MM_PER_PULSE;
+    DB(F("pulsesMinutes ptr="));
+    DB(ptr);
+    DB(F(" count="));
+    DB(count);
+    DB(F(" mins="));
+    DB(minutes);
+    DB(F(" case: "));
+    if (minutes <= ptr) {
+        DBLN(1);
+        return pulsesInRange(ptr-minutes, ptr-1);
+    } else if (ptr == 0) {
+        DBLN(2);
+        return pulsesInRange(MINUTES_TO_RECORD-minutes, MINUTES_TO_RECORD-1);
+    } else {
+        DBLN(3);
+        return pulsesInRange(0, ptr-1) + pulsesInRange(MINUTES_TO_RECORD-minutes+ptr, MINUTES_TO_RECORD-1);
+    }
 }
 
-float RainfallSensorClass::rainfallLastHour()
+float RainfallSensorClass::rainfallMinutes(uint16_t minutes)
 {
-    // Case 1: add up all the rainfall for known minutes
-    uint16_t totalPulses = 0;
-    for (uint8_t i=0; i<count; i++) {
-        totalPulses += pulseHistory[i];
-    }
+    return pulsesMinutes(minutes)*RAINFALL_MM_PER_PULSE; 
+}
 
-    // Calculate and return
-    return RAINFALL_MM_PER_PULSE * totalPulses;
+uint16_t RainfallSensorClass::pulsesInRange(uint16_t from, uint16_t to) 
+{
+    DB(F("pulsesInRange from="));
+    DB(from);
+    DB(F(" to="));
+    DBLN(to);
+    uint16_t pulses = 0;
+    for(uint16_t i=from; i<=to && i<MINUTES_TO_RECORD && i<count; i++) {
+        pulses += pulseHistory[i];
+    }
+    return pulses;
 }
 
 

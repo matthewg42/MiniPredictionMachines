@@ -56,20 +56,21 @@ void windspeedIntHandler()
 void sendData()
 {
     sendSeqNo++;
-    String buf;
-    buf += "SQ=";   buf += sendSeqNo;
-    buf += " TE=";   buf += TemperatureSensor.getCelcius();
-    buf += " MO=";   buf += MoistureSensor.isMoist();
-    buf += " WS=";   buf += calculateWindspeedMs(WindspeedSensor.readPulses(), wakeupCounter*WDT_PERIOD_MS);
-    buf += " RM=";   buf += RainfallSensor.rainfallLastMinute();
-    buf += " RH=";   buf += RainfallSensor.rainfallLastHour();
-    buf += " DC=";   buf += ((float)millis()/(wakeupCounter*WDT_PERIOD_MS));
-    buf += " CS=";   buf += 0;
-    Serial.println(buf);
-
-    // Send data three times to allow for wakeup times and so on
+    DB(F("sending data..."));
+    float tempC = TemperatureSensor.getCelcius();
+    bool moist = MoistureSensor.isMoist();
+    float windspeed = calculateWindspeedMs(WindspeedSensor.readPulses(), wakeupCounter*WDT_PERIOD_MS);
+    float rainMin = RainfallSensor.rainfallMinutes(1);
+    float rainHr = RainfallSensor.rainfallMinutes(60);
+    float rainDay = RainfallSensor.rainfallMinutes(60*24);
     for (uint8_t i=0; i<3; i++) {
-        HC12Serial.println(buf);
+        Serial.print(F("SQ="));  Serial.print(sendSeqNo);
+        Serial.print(F(" TE=")); Serial.print(tempC);
+        Serial.print(F(" MO=")); Serial.print(moist);
+        Serial.print(F(" WS=")); Serial.print(windspeed);
+        Serial.print(F(" RM=")); Serial.print(rainMin);
+        Serial.print(F(" RH=")); Serial.print(rainHr);
+        Serial.print(F(" RD=")); Serial.println(rainDay);
         delay(10);
     }
 }
