@@ -22,6 +22,7 @@
 #include "RainfallSensor.h"
 
 // And general configuration like pins
+#include "WeatherPacket.h"
 #include "Config.h"
 
 // Flags which will set from interrupt handlers (these need the volatile keyword)
@@ -53,25 +54,44 @@ void windspeedIntHandler()
 }
 
 // Regular functions
-void sendData()
+void sendData(uint32_t realMillis)
 {
     sendSeqNo++;
     DB(F("sending data..."));
-    float tempC = TemperatureSensor.getCelcius();
-    bool moist = MoistureSensor.isMoist();
-    float windspeed = calculateWindspeedMs(WindspeedSensor.readPulses(), wakeupCounter*WDT_PERIOD_MS);
-    float rainMin = RainfallSensor.rainfallMinutes(1);
-    float rainHr = RainfallSensor.rainfallMinutes(60);
-    float rainDay = RainfallSensor.rainfallMinutes(60*24);
+    WeatherPacket data;
+    data.sequenceNumber = sendSeqNo;
+    data.temperatureC = TemperatureSensor.getCelcius();
+    data.moisture = MoistureSensor.isMoist();
+    data.windSpeedMs = calculateWindspeedMs(WindspeedSensor.readPulses(), realMillis - lastSend);
+    data.rainFallMmMinute = RainfallSensor.rainfallMinutes(1);
+    data.rainFallMmHour = RainfallSensor.rainfallMinutes(60);
+    data.rainFallMmDay = RainfallSensor.rainfallMinutes(60*24);
+    weatherPacketCsUpdate(&data);
+
+    WeatherUnion wu;
+    wu.data = data;
+
+    Serial.print(F("SQ="));
+    Serial.print(data.sequenceNumber);
+    Serial.print(F(" TE="));
+    Serial.print(data.temperatureC);
+    Serial.print(F(" MO="));
+    Serial.print(data.moisture);
+    Serial.print(F(" WS="));
+    Serial.print(data.windSpeedMs);
+    Serial.print(F(" RM="));
+    Serial.print(data.rainFallMmMinute);
+    Serial.print(F(" RH="));
+    Serial.print(data.rainFallMmHour);
+    Serial.print(F(" RD="));
+    Serial.print(data.rainFallMmDay);
+    Serial.print(F(" CS="));
+    Serial.println(data.checksum);
+
     for (uint8_t i=0; i<3; i++) {
-        Serial.print(F("SQ="));  Serial.print(sendSeqNo);
-        Serial.print(F(" TE=")); Serial.print(tempC);
-        Serial.print(F(" MO=")); Serial.print(moist);
-        Serial.print(F(" WS=")); Serial.print(windspeed);
-        Serial.print(F(" RM=")); Serial.print(rainMin);
-        Serial.print(F(" RH=")); Serial.print(rainHr);
-        Serial.print(F(" RD=")); Serial.println(rainDay);
-        delay(10);
+        for (uint8_t j=0; j<sizeof(WeatherPacket); j++) {
+            HC12Serial.write(wu.bytes[j]);
+        }
     }
 }
 
@@ -174,8 +194,8 @@ void loop()
         }
 
         if (realMillis >= lastSend + ((uint32_t)SEND_DATA_PERIOD_SEC*1000)) {
+            sendData(realMillis);
             lastSend = realMillis;
-            sendData();
         }
     }
 
