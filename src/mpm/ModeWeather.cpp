@@ -1,4 +1,5 @@
 #include <EspApConfigurator.h>
+#include <Millis.h>
 #include <stdio.h>
 #include "ModeWeather.h"
 #include "ModeRealTime.h"
@@ -9,12 +10,12 @@ ModeWeather_ ModeWeather;
 
 ModeWeather_::ModeWeather_() 
 {
+    resetData();
 }
 
 void ModeWeather_::begin()
 {
     DBLN(F("ModeWeather::begin"));
-    resetBuffer();
 }
 
 void ModeWeather_::modeStart()
@@ -29,55 +30,68 @@ void ModeWeather_::modeStop()
 
 void ModeWeather_::modeUpdate()
 {
+    // Timeout
+    if (Millis() - lastRead > PACKET_READ_TIMEOUT_MS) {
+        DBLN(F("timeout"));
+        resetData();
+    }
+
     while(HC12Serial.available()) {
         int c = HC12Serial.read();
         if (c < 0) {
-            resetBuffer();
+            DBLN(F("serial error"));
+            resetData();
             break;
-        } else if (message.length() > 80 || c == '\n' || c == '\r') {
-            handleMessage();
+        }
+
+        lastRead = Millis();
+        if (!inPacket) {
+            // do the magic...
+            magicBuf[magicPtr++] = (uint8_t)c;
+            if (!checkMagic()) { 
+                DBLN(F("bad magic"));
+                resetData(); 
+                break; 
+            }
+            if (magicPtr == 2) {
+                inPacket = true;
+            }
+            break;
         } else {
-            message += (char)c;
+            packet.bytes[dataOffset++] = (uint8_t)c;
+            if (dataOffset >= sizeof(WeatherPacket)) {
+                handleData();
+                resetData();
+            }
         }
     }
 }
 
-void ModeWeather_::resetBuffer()
+void ModeWeather_::handleData()
 {
-    message = "";
+    DB(F("SQ="));
+    DB(packet.data.sequenceNumber);
+    DB(F("TE="));
+    DB(packet.data.temperatureC);
+    DB(F("CS="));
+    DBLN(packet.data.checksum);
 }
 
-void ModeWeather_::handleMessage()
+void ModeWeather_::resetData()
 {
-    // SQ=1799 TE=13.31 MO=1 WS=0.00 RM=0.00 RH=0.00 DC=0.12 CS=0
-    uint32_t sequence;
-    float temperature, windspeed, rainMinute, rainHour, dutyCycle;
-    bool moisture;
-    uint16_t checksum;
-    DB(F("handleMessage: "));
-    DBLN(message);
-/*    int i = sscanf(message.c_str(), "SQ=%ld TE=%f MO=%d WS=%f RM=%f RH=%f DC=%f CS=%d", 
-                &sequence, &temperature, &moisture, &windspeed, 
-                &rainMinute, &rainHour, &dutyCycle, &checksum);
-    DB(F("i=")); 
-    DB(i);
-    DB(F("sequence="));
-    DB(sequence);
-    DB(F(" temperature="));
-    DB(temperature);
-    DB(F(" moisture="));
-    DB(moisture);
-    DB(F(" windspeed="));
-    DB(windspeed);
-    DB(F(" rainMinute="));
-    DB(rainMinute);
-    DB(F(" rainHour="));
-    DB(rainHour);
-    DB(F(" dutyCycle="));
-    DB(dutyCycle);
-    DB(F("checksum="));
-    DBLN(checksum); */
-    resetBuffer();
+    memset(magicBuf, 0, 2);
+    magicPtr = 0;
+    inPacket = false;
+    dataOffset = 0;
 }
 
+bool ModeWeather_::checkMagic()
+{
+    for (uint8_t i=0; i<magicPtr && i<2; i++) {
+        if (magicBuf[i] != WEATHER_PACKET_MAGIC[i]) {
+            return false;
+        }
+    }
+    return true;
+}
 

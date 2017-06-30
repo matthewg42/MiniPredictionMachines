@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Mode.h>
+#include "WeatherPacket.h"
 
 class ModeWeather_ : public Mode{
 public:
@@ -9,12 +10,18 @@ public:
     void modeStart();
     void modeStop();
     void modeUpdate();
-    void resetBuffer();
-    void handleMessage();
+    void handleData();
 
 protected:
-    String message;
+    uint8_t magicBuf[2];
+    uint8_t magicPtr;
+    bool inPacket;
+    uint8_t dataOffset;
+    WeatherUnion packet;
+    unsigned long lastRead;
 
+    void resetData();
+    bool checkMagic();
 };
 
 extern ModeWeather_ ModeWeather;
