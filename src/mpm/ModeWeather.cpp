@@ -8,7 +8,8 @@
 
 ModeWeather_ ModeWeather;
 
-ModeWeather_::ModeWeather_() 
+ModeWeather_::ModeWeather_() :
+    lastSeq(0)
 {
     resetData();
 }
@@ -43,17 +44,11 @@ void ModeWeather_::modeUpdate()
             resetData();
             break;
         }
-        //DB("RX: 0x");
-        //if (c < 0x10) { DB('0'); }
-        //DB(c, HEX);
-        //DB(" ");
-        //DBLN((char)c);
         lastRead = Millis();
         if (!inPacket) {
             // do the magic...
             magicBuf[magicPtr++] = (uint8_t)c;
             if (!checkMagic()) { 
-                DBLN(F("bad magic"));
                 resetData(); 
                 break; 
             }
@@ -73,22 +68,31 @@ void ModeWeather_::modeUpdate()
 
 void ModeWeather_::handleData()
 {
-    DB(F("SQ="));
-    DB(packet.data.sequenceNumber);
-    DB(F(" TE="));
-    DB(packet.data.temperatureC);
-    DB(F(" MO="));
-    DB(packet.data.moisture);
-    DB(F(" WS="));
-    DB(packet.data.windSpeedMs);
-    DB(F(" RM="));
-    DB(packet.data.rainFallMmMinute);
-    DB(F(" RH="));
-    DB(packet.data.rainFallMmHour);
-    DB(F(" RD="));
-    DB(packet.data.rainFallMmDay);
-    DB(F(" CS="));
-    DBLN(packet.data.checksum);
+    if (!weatherPacketCsTest(&packet.data)) {
+        DBLN(F("bad checksum"));
+    }
+
+    // Only handle a given message once
+    if (packet.data.sequenceNumber != lastSeq) {
+        lastSeq = packet.data.sequenceNumber;
+        DB(ModeRealTime.isoTimestamp());
+        DB(F(" SQ="));
+        DB(packet.data.sequenceNumber);
+        DB(F(" TE="));
+        DB(packet.data.temperatureC);
+        DB(F(" MO="));
+        DB(packet.data.moisture);
+        DB(F(" WS="));
+        DB(packet.data.windSpeedMs);
+        DB(F(" RM="));
+        DB(packet.data.rainFallMmMinute);
+        DB(F(" RH="));
+        DB(packet.data.rainFallMmHour);
+        DB(F(" RD="));
+        DB(packet.data.rainFallMmDay);
+        DB(F(" CS="));
+        DBLN(packet.data.checksum);
+    }
 }
 
 void ModeWeather_::resetData()

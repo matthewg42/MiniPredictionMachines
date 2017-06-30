@@ -23,6 +23,7 @@ public:
     void modeStop();
     void modeUpdate();
     unsigned long unixTime();
+    String isoTimestamp();
 
 protected:
     unsigned long _lastNtpAttempt;

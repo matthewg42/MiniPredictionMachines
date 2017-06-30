@@ -112,6 +112,11 @@ unsigned long ModeRealTime_::unixTime()
     return _unixTime + ((Millis() - _lastNtpSuccess) / 1000);
 }
 
+String ModeRealTime_::isoTimestamp()
+{
+    return "YYYY-MM-DD HH:MM:SS ZON";
+}
+
 void ModeRealTime_::clearBuf()
 {
     memset(_buf, 0, NTP_PACKET_SIZE * sizeof(byte));

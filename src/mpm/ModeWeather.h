@@ -19,6 +19,7 @@ protected:
     uint8_t dataPtr;
     WeatherUnion packet;
     unsigned long lastRead;
+    uint32_t lastSeq;
 
     void resetData();
     bool checkMagic();
