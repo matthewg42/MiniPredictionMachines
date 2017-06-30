@@ -31,7 +31,7 @@ void ModeWeather_::modeStop()
 void ModeWeather_::modeUpdate()
 {
     // Timeout
-    if (Millis() - lastRead > PACKET_READ_TIMEOUT_MS) {
+    if ((magicPtr>0 || dataPtr>0) && Millis() - lastRead > PACKET_READ_TIMEOUT_MS) {
         DBLN(F("timeout"));
         resetData();
     }
@@ -43,7 +43,11 @@ void ModeWeather_::modeUpdate()
             resetData();
             break;
         }
-
+        //DB("RX: 0x");
+        //if (c < 0x10) { DB('0'); }
+        //DB(c, HEX);
+        //DB(" ");
+        //DBLN((char)c);
         lastRead = Millis();
         if (!inPacket) {
             // do the magic...
@@ -58,8 +62,8 @@ void ModeWeather_::modeUpdate()
             }
             break;
         } else {
-            packet.bytes[dataOffset++] = (uint8_t)c;
-            if (dataOffset >= sizeof(WeatherPacket)) {
+            packet.bytes[dataPtr++] = (uint8_t)c;
+            if (dataPtr >= sizeof(WeatherPacket)) {
                 handleData();
                 resetData();
             }
@@ -71,9 +75,19 @@ void ModeWeather_::handleData()
 {
     DB(F("SQ="));
     DB(packet.data.sequenceNumber);
-    DB(F("TE="));
+    DB(F(" TE="));
     DB(packet.data.temperatureC);
-    DB(F("CS="));
+    DB(F(" MO="));
+    DB(packet.data.moisture);
+    DB(F(" WS="));
+    DB(packet.data.windSpeedMs);
+    DB(F(" RM="));
+    DB(packet.data.rainFallMmMinute);
+    DB(F(" RH="));
+    DB(packet.data.rainFallMmHour);
+    DB(F(" RD="));
+    DB(packet.data.rainFallMmDay);
+    DB(F(" CS="));
     DBLN(packet.data.checksum);
 }
 
@@ -82,7 +96,7 @@ void ModeWeather_::resetData()
     memset(magicBuf, 0, 2);
     magicPtr = 0;
     inPacket = false;
-    dataOffset = 0;
+    dataPtr = 0;
 }
 
 bool ModeWeather_::checkMagic()

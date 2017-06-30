@@ -16,7 +16,7 @@ protected:
     uint8_t magicBuf[2];
     uint8_t magicPtr;
     bool inPacket;
-    uint8_t dataOffset;
+    uint8_t dataPtr;
     WeatherUnion packet;
     unsigned long lastRead;
 
