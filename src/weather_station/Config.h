@@ -54,3 +54,8 @@ const float WINDSPEED_MS_PER_HZ         = 0.7;
 
 // See doc/RainfallCalibration.md for how this was computed
 const float RAINFALL_MM_PER_PULSE       = 0.319951;
+
+// Send before the weather packet as an indicator that the thing
+// that follows is a weather packet
+const uint8_t WEATHER_PACKET_MAGIC[]    = {0x12, 0x13};
+

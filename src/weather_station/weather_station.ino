@@ -89,6 +89,8 @@ void sendData(uint32_t realMillis)
     Serial.println(data.checksum);
 
     for (uint8_t i=0; i<3; i++) {
+        HC12Serial.write(WEATHER_PACKET_MAGIC[0]);
+        HC12Serial.write(WEATHER_PACKET_MAGIC[1]);
         for (uint8_t j=0; j<sizeof(WeatherPacket); j++) {
             HC12Serial.write(wu.bytes[j]);
         }
