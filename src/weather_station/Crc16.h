@@ -27,13 +27,9 @@
 //-------------------------------------------------------------------------------------
 #ifndef CRC16_H
 #define CRC16_H
-#define LIBRARY_VERSION_CRC16_H   "0.1.1"
+#define LIBRARY_VERSION_CRC16_H   "0.1.2"
 
-#if defined(ARDUINO) && ARDUINO >= 100
-  #include "Arduino.h"
-#else
-  #include "WProgram.h"
-#endif
+#include <stdint.h>
 
 class Crc16 {
    private:
@@ -47,7 +43,7 @@ class Crc16 {
         uint8_t _reflectOut;
         //Crc value
 		uint16_t _crc;
-		uint8_t reflect(uint8_t data, uint8_t bits = 32);
+		uint8_t reflect(uint8_t data, uint8_t bits=32);
 
    public:
         inline Crc16()
