@@ -1,6 +1,7 @@
 #include <MutilaDebug.h>
 #include <Millis.h>
 #include <EspApConfigurator.h>
+#include <TimeLib.h>
 //#include <TimeLib.h>
 #include "ModeRealTime.h"
 #include "Config.h"
@@ -106,7 +107,7 @@ void ModeRealTime_::ntpUpdate()
     DBLN("NTP failed");
 }
 
-unsigned long ModeRealTime_::unixTime()
+time_t ModeRealTime_::unixTime()
 {
     if (_unixTime == 0) return 0;
     return _unixTime + ((Millis() - _lastNtpSuccess) / 1000);
@@ -114,7 +115,15 @@ unsigned long ModeRealTime_::unixTime()
 
 String ModeRealTime_::isoTimestamp()
 {
-    return "YYYY-MM-DD HH:MM:SS ZON";
+    char buf[24];
+    snprintf(buf, 24, "%04d-%02d-%02d %02d:%02d:%02d UT", 
+             year(unixTime()), 
+             month(unixTime()), 
+             day(unixTime()), 
+             hour(unixTime()), 
+             minute(unixTime()), 
+             second(unixTime()));
+    return String(buf);
 }
 
 void ModeRealTime_::clearBuf()

@@ -11,6 +11,7 @@
 #include <U8g2lib.h>
 #include <SPI.h>
 #include <Wire.h>
+#include <TimeLib.h>
 
 // Physical devices
 #include "HC12Serial.h"

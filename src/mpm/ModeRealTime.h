@@ -3,6 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include <Mode.h>
+#include <TimeLib.h>
 
 #define LOCAL_NTP_PORT      8888
 #define NTP_PACKET_SIZE     48
@@ -22,13 +23,13 @@ public:
     void modeStart();
     void modeStop();
     void modeUpdate();
-    unsigned long unixTime();
+    time_t unixTime();
     String isoTimestamp();
 
 protected:
     unsigned long _lastNtpAttempt;
     unsigned long _lastNtpSuccess;
-    unsigned long _unixTime;
+    time_t _unixTime;
     IPAddress _ntpServerIP;
     WiFiUDP _udp;
     byte _buf[NTP_PACKET_SIZE];   
