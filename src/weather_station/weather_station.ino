@@ -4,6 +4,7 @@
 #include <avr/wdt.h>
 #include <MutilaDebug.h>
 #include <Mode.h>
+#include <VIPCalculation.h>
 #include <SoftwareSerial.h>
 #include <Millis.h>
 #include <string.h>
@@ -20,6 +21,7 @@
 #include "TemperatureSensor.h"
 #include "WindspeedSensor.h"
 #include "RainfallSensor.h"
+#include "BatteryVoltage.h"
 
 // And general configuration like pins
 #include "WeatherPacket.h"
@@ -66,12 +68,15 @@ void sendData(uint32_t realMillis)
     data.rainFallMmMinute = RainfallSensor.rainfallMinutes(1);
     data.rainFallMmHour = RainfallSensor.rainfallMinutes(60);
     data.rainFallMmDay = RainfallSensor.rainfallMinutes(60*24);
+    data.batteryVoltage = BatteryVoltage.volts();
     weatherPacketCsUpdate(&data);
 
     WeatherUnion wu;
     wu.data = data;
 
-    Serial.print(F("SQ="));
+    Serial.print(F("packet size="));
+    Serial.print(sizeof(WeatherPacket));
+    Serial.print(F(" SQ="));
     Serial.print(data.sequenceNumber);
     Serial.print(F(" TE="));
     Serial.print(data.temperatureC);
@@ -85,6 +90,8 @@ void sendData(uint32_t realMillis)
     Serial.print(data.rainFallMmHour);
     Serial.print(F(" RD="));
     Serial.print(data.rainFallMmDay);
+    Serial.print(F(" BV="));
+    Serial.print(data.batteryVoltage);
     Serial.print(F(" CS="));
     Serial.println(data.checksum);
 
@@ -123,12 +130,16 @@ void setup()
     Serial.begin(115200);
     DBLN(F("\n\nS:setup"));
 
+    DB("vDivVolts(511, 100, 100, 5.00) = ");
+    DBLN(vDivVolts(511, 100, 100, 5.00));
+
     HC12Serial.begin(HC12_BAUD);
 
     MoistureSensor.begin();
     TemperatureSensor.begin();
     WindspeedSensor.begin();
     RainfallSensor.begin();
+    BatteryVoltage.begin();
 
     noInterrupts(); // disable interrupts while we're setting up handlers
 

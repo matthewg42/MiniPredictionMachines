@@ -11,6 +11,7 @@ typedef struct {
     float rainFallMmMinute;
     float rainFallMmHour;
     float rainFallMmDay;
+    float batteryVoltage;
     uint16_t checksum;
 }__attribute__((packed, aligned(1))) WeatherPacket;
 

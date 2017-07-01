@@ -92,6 +92,8 @@ void ModeWeather_::handleData()
         DB(packet.data.rainFallMmHour);
         DB(F(" RD="));
         DB(packet.data.rainFallMmDay);
+        DB(F(" BV="));
+        DB(packet.data.batteryVoltage);
         DB(F(" CS="));
         DBLN(packet.data.checksum);
 
@@ -129,6 +131,7 @@ void ModeWeather_::uploadThingspeak()
     url.replace("{4}", String(packet.data.rainFallMmMinute, 3));
     url.replace("{5}", String(packet.data.rainFallMmHour, 3));
     url.replace("{6}", String(packet.data.rainFallMmDay, 3));
+    url.replace("{7}", String(packet.data.batteryVoltage, 3));
 
     yield();
 

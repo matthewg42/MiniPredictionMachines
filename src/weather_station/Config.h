@@ -42,7 +42,13 @@ const uint32_t HC12_BAUD                = 9600;
 const uint16_t WDT_PERIOD_MS            = 500;
 
 // How many seconds between calling sendData()
+#ifdef UPDATE_PERIOD
+// We do this thing with the UPDATE_PERIOD define, so I can quickly
+// change on the command line or in the Makefile for testing.
+const uint8_t SEND_DATA_PERIOD_SEC      = UPDATE_PERIOD;
+#else
 const uint8_t SEND_DATA_PERIOD_SEC      = 60;
+#endif
 
 // How many seconds to save a chunk of rain data
 const uint8_t RAIN_SAVE_PERIOD_SEC      = 60;
@@ -58,4 +64,12 @@ const float RAINFALL_MM_PER_PULSE       = 0.319951;
 // Send before the weather packet as an indicator that the thing
 // that follows is a weather packet
 const uint8_t WEATHER_PACKET_MAGIC[]    = {0x12, 0x13};
+
+// How many samples to take when measuring voltage of battery, 
+// resistance of voltage divider in K-Ohms, and reference voltage
+const uint8_t VBATT_SAMPLES             = 8;
+const uint8_t VBATT_R1                  = 100;
+const uint8_t VBATT_R2                  = 100;
+const float VBATT_VREF                  = 5.0;
+
 
