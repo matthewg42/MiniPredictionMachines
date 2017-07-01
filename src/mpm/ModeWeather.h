@@ -3,6 +3,9 @@
 #include <Mode.h>
 #include "WeatherPacket.h"
 
+#define API_KEY         "GED0JXRS9NWB7LYV"
+#define URL_TEMPLATE    F("http://api.thingspeak.com/update?api_key={k}&field1={1}&field2={2}&field3={3}&field4={4}&field5={5}&field6={6}")
+
 class ModeWeather_ : public Mode{
 public:
     ModeWeather_();
@@ -23,6 +26,7 @@ protected:
 
     void resetData();
     bool checkMagic();
+    void uploadThingspeak();
 };
 
 extern ModeWeather_ ModeWeather;

@@ -1,4 +1,6 @@
 #include <EspApConfigurator.h>
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
 #include <Millis.h>
 #include <stdio.h>
 #include "ModeWeather.h"
@@ -92,6 +94,8 @@ void ModeWeather_::handleData()
         DB(packet.data.rainFallMmDay);
         DB(F(" CS="));
         DBLN(packet.data.checksum);
+
+        uploadThingspeak();
     }
 }
 
@@ -113,3 +117,27 @@ bool ModeWeather_::checkMagic()
     return true;
 }
 
+void ModeWeather_::uploadThingspeak()
+{
+    HTTPClient http;
+    
+    String url = URL_TEMPLATE;
+    url.replace("{k}", API_KEY);
+    url.replace("{1}", String(packet.data.temperatureC, 3));
+    url.replace("{2}", String(packet.data.moisture));
+    url.replace("{3}", String(packet.data.windSpeedMs, 3));
+    url.replace("{4}", String(packet.data.rainFallMmMinute, 3));
+    url.replace("{5}", String(packet.data.rainFallMmHour, 3));
+    url.replace("{6}", String(packet.data.rainFallMmDay, 3));
+
+    yield();
+
+    http.begin(url.c_str());
+    int httpCode = http.GET();
+    if (httpCode > 0) {
+        String payload = http.getString();
+        DB(F("Thingspeak response: "));
+        DBLN(payload);
+    }
+
+}
