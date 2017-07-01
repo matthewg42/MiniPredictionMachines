@@ -22,14 +22,5 @@ float BatteryVoltageClass::volts()
     for (uint8_t i=0; i<VBATT_SAMPLES; i++) {
         sum += analogRead(_pin);
     }
-    DB("vDivVolts(");
-    DB(sum / VBATT_SAMPLES);
-    DB(", ");
-    DB(VBATT_R1);
-    DB(", ");
-    DB(VBATT_R2);
-    DB(", ");
-    DB(VBATT_VREF);
-    DB(") = ");
     return vDivVolts(sum / VBATT_SAMPLES, VBATT_R1, VBATT_R2, VBATT_VREF);
 }
