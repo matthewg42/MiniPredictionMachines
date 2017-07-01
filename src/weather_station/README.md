@@ -1,6 +1,15 @@
 Weather Station 
 ===============
 
+Dependencies
+------------
+
+Make sure the following libraries are installed to build this sketch:
+
+* Mutila (>= v1.0.1) from https://github.com/matthewg42/Mutila
+* DS18B20 (I used version fb9f821, dated 2015-10-23 12:04) https://github.com/nettigo/DS18B20
+* OneWire (I used v2.3.3 from the Arduino IDE library manager tool) 
+
 Devices attached
 ----------------
 
@@ -38,3 +47,4 @@ The board has connectors for extra devices:
 * SWA & SWB buttons
 * Wind vane for wind direction (analog value)
 * GPS (second software serial TX&RX, GPS_CS pin
+
