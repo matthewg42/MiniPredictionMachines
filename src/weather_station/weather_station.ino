@@ -13,7 +13,7 @@
 
 // Includes used by other classes (must put here for Arduino IDE)
 #include <OneWire.h>
-#include <DallasTemperature.h>
+#include <DS18B20.h>
 
 // Include our classes for the various components
 #include "HC12Serial.h"
@@ -59,7 +59,7 @@ void windspeedIntHandler()
 void sendData(uint32_t realMillis)
 {
     sendSeqNo++;
-    DB(F("sending data..."));
+    DBLN(F("sending data..."));
     WeatherPacket data;
     data.sequenceNumber = sendSeqNo;
     data.temperatureC = TemperatureSensor.getCelcius();
@@ -74,26 +74,26 @@ void sendData(uint32_t realMillis)
     WeatherUnion wu;
     wu.data = data;
 
-    Serial.print(F("packet size="));
-    Serial.print(sizeof(WeatherPacket));
-    Serial.print(F(" SQ="));
-    Serial.print(data.sequenceNumber);
-    Serial.print(F(" TE="));
-    Serial.print(data.temperatureC);
-    Serial.print(F(" MO="));
-    Serial.print(data.moisture);
-    Serial.print(F(" WS="));
-    Serial.print(data.windSpeedMs);
-    Serial.print(F(" RM="));
-    Serial.print(data.rainFallMmMinute);
-    Serial.print(F(" RH="));
-    Serial.print(data.rainFallMmHour);
-    Serial.print(F(" RD="));
-    Serial.print(data.rainFallMmDay);
-    Serial.print(F(" BV="));
-    Serial.print(data.batteryVoltage);
-    Serial.print(F(" CS="));
-    Serial.println(data.checksum);
+    DB(F("packet size="));
+    DB(sizeof(WeatherPacket));
+    DB(F(" SQ="));
+    DB(data.sequenceNumber);
+    DB(F(" TE="));
+    DB(data.temperatureC);
+    DB(F(" MO="));
+    DB(data.moisture);
+    DB(F(" WS="));
+    DB(data.windSpeedMs);
+    DB(F(" RM="));
+    DB(data.rainFallMmMinute);
+    DB(F(" RH="));
+    DB(data.rainFallMmHour);
+    DB(F(" RD="));
+    DB(data.rainFallMmDay);
+    DB(F(" BV="));
+    DB(data.batteryVoltage);
+    DB(F(" CS="));
+    DBLN(data.checksum);
 
     for (uint8_t i=0; i<3; i++) {
         HC12Serial.write(WEATHER_PACKET_MAGIC[0]);
@@ -129,9 +129,6 @@ void setup()
 {
     Serial.begin(115200);
     DBLN(F("\n\nS:setup"));
-
-    DB("vDivVolts(511, 100, 100, 5.00) = ");
-    DBLN(vDivVolts(511, 100, 100, 5.00));
 
     HC12Serial.begin(HC12_BAUD);
 
@@ -194,6 +191,7 @@ void loop()
         wakeupCounter++;
         DB(F("wakeup #"));
         DBLN(wakeupCounter);
+
         uint32_t realMillis = wakeupCounter*WDT_PERIOD_MS;
 
         // decremement the debounce counter
@@ -204,6 +202,13 @@ void loop()
         if (realMillis >= lastRainMinute + ((uint32_t)RAIN_SAVE_PERIOD_SEC*1000)) {
             lastRainMinute = realMillis;
             RainfallSensor.addPulseMinute();
+        }
+
+        // One second before thre send, request the temperature be ready by the sensor
+        uint32_t tempTime = ((uint32_t)(SEND_DATA_PERIOD_SEC-1)*1000);
+        if (realMillis >= lastSend + tempTime && realMillis < lastSend + tempTime + WDT_PERIOD_MS) {
+            DBLN(F("requesting temperature read"));
+            TemperatureSensor.request();
         }
 
         if (realMillis >= lastSend + ((uint32_t)SEND_DATA_PERIOD_SEC*1000)) {
