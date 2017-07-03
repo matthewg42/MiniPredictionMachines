@@ -20,6 +20,7 @@
 #include "SWDOWN.h"
 
 // Modes
+#include "ModeMessage.h"
 #include "ModeWeather.h"
 #include "ModeRealTime.h"
 //#include "ModeUploadData.h"
@@ -51,6 +52,7 @@ void setup()
 
     ModeRealTime.begin();
     ModeWeather.begin();
+    ModeMessage.begin();
     EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
 
     // Enable web server in ModeWifiClient - this just makes testing
@@ -69,5 +71,6 @@ void loop()
     EspApConfigurator.update();
     ModeRealTime.update();
     ModeWeather.update();
+    ModeMessage.update();
 }
 

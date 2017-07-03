@@ -17,6 +17,7 @@
 #define     SET_NTP_SERVER          F("Time Server")
 #define     NTP_REFRESH_PERIOD_S    1800
 #define     NTP_RETRY_PERIOD_S      10
+#define     OLED_MESSAGE_PERIOD_S   10
 
 const uint8_t WEATHER_PACKET_MAGIC[]    = {0x12, 0x13};
 const uint16_t PACKET_READ_TIMEOUT_MS   = 200;
