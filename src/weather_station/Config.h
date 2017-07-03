@@ -33,7 +33,7 @@ const uint8_t SDA_PIN                   = A4;
 const uint8_t SCLK_PIN                  = A5;
 
 // Comms speed for HC12 device
-const uint32_t HC12_BAUD                = 9600;
+const uint32_t HC12_BAUD                = 4800;
 
 // Tune this based on measuements from an external device with an 
 // accurate clock. It's not going to be perfect because the clock

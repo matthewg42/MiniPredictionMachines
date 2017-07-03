@@ -94,6 +94,8 @@ void ModeWeather_::handleData()
         DB(packet.data.rainFallMmDay);
         DB(F(" BV="));
         DB(packet.data.batteryVoltage);
+        DB(F(" DC="));
+        DB(packet.data.dutyCycle);
         DB(F(" CS="));
         DBLN(packet.data.checksum);
 

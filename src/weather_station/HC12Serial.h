@@ -9,6 +9,8 @@ public:
     HC12SerialClass(uint8_t rxPin, uint8_t txPin, uint8_t setPin);
     void begin(long baud);
     void atCommandMode(bool on);
+    void sleep();
+    void wakeup();
 
 protected:
     uint8_t _setPin;

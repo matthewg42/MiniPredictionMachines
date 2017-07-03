@@ -1,4 +1,3 @@
-- low power modes of HC12 on weather station
 - status messaged on OLED screen (e.g. "connecting to WiFi...")
 - styling the Access Point setup page
 - longitude/latitude settings in config

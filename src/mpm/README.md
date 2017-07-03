@@ -32,6 +32,11 @@ TODO
 - Get API call example from Dominic
 - Define API calls
 
+Hardware Config
+===============
+
+HC12 device must be in FU2/4800 BAUD mode.
+
 API Calls
 =========
 

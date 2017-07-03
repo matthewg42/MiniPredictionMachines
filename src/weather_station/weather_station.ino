@@ -69,6 +69,7 @@ void sendData(uint32_t realMillis)
     data.rainFallMmHour = RainfallSensor.rainfallMinutes(60);
     data.rainFallMmDay = RainfallSensor.rainfallMinutes(60*24);
     data.batteryVoltage = BatteryVoltage.volts();
+    data.dutyCycle = (float)millis()/realMillis;
     weatherPacketCsUpdate(&data);
 
     WeatherUnion wu;
@@ -92,6 +93,8 @@ void sendData(uint32_t realMillis)
     DB(data.rainFallMmDay);
     DB(F(" BV="));
     DB(data.batteryVoltage);
+    DB(F(" DC="));
+    DB(data.dutyCycle);
     DB(F(" CS="));
     DBLN(data.checksum);
 
@@ -102,6 +105,8 @@ void sendData(uint32_t realMillis)
             HC12Serial.write(wu.bytes[j]);
         }
     }
+    delay(300);
+    HC12Serial.sleep();
 }
 
 void goSleep()
@@ -131,6 +136,10 @@ void setup()
     DBLN(F("\n\nS:setup"));
 
     HC12Serial.begin(HC12_BAUD);
+
+    // We don't need the HC12 doing anything yet - we'll wake it up before
+    // sending data
+    HC12Serial.sleep();
 
     MoistureSensor.begin();
     TemperatureSensor.begin();
@@ -204,11 +213,16 @@ void loop()
             RainfallSensor.addPulseMinute();
         }
 
-        // One second before thre send, request the temperature be ready by the sensor
+        // One second (two wakeups) before the send, request the temperature be ready by the sensor
         uint32_t tempTime = ((uint32_t)(SEND_DATA_PERIOD_SEC-1)*1000);
         if (realMillis >= lastSend + tempTime && realMillis < lastSend + tempTime + WDT_PERIOD_MS) {
             DBLN(F("requesting temperature read"));
             TemperatureSensor.request();
+        }
+
+        // Half a second (one wakeup) before the send, wake up the HC12
+        if (realMillis >= lastSend + tempTime + WDT_PERIOD_MS && realMillis < lastSend + tempTime + (2*WDT_PERIOD_MS)) {
+            HC12Serial.wakeup();
         }
 
         if (realMillis >= lastSend + ((uint32_t)SEND_DATA_PERIOD_SEC*1000)) {

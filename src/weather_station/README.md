@@ -14,6 +14,7 @@ Devices attached
 ----------------
 
 * HC12 wireless serial
+   * Must be in 4800 baud, FU2 mode (power save)
 * DS18B20 one-wire temperature sensor
 * Moisture sensor - pin goes high when it is raining / drizzling
 * Rainfall sensor - rate of pulses indicates amount of rainfall (over some threshhold)

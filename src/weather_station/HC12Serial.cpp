@@ -1,3 +1,4 @@
+#include <MutilaDebug.h>
 #include "HC12Serial.h"
 #include "Config.h"
 
@@ -21,5 +22,24 @@ void HC12SerialClass::atCommandMode(bool on)
 {
     // It's inverted logic - pull SET to LOW to activate command mode
     digitalWrite(_setPin, on ? LOW : HIGH);
+}
+
+void HC12SerialClass::sleep()
+{
+    atCommandMode(true);
+    DBLN(F("HC12 sleep... "));
+    print(F("AT+SLEEP\r"));
+    delay(10);
+    atCommandMode(false);
+    
+}
+
+void HC12SerialClass::wakeup()
+{
+    // HC12 wakes up when taken out of AT mode 
+    DBLN(F("HC12 wakeup"));
+    atCommandMode(true);
+    delay(10);
+    atCommandMode(false);
 }
 
