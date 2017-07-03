@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+
+import mpm.api
+from mpm.api import api
+from flask import Flask, redirect, send_from_directory
+import logging
+import os
+import sys
+from flask_cors import CORS, cross_origin
+
+global args
+
+def main():
+    init_log()
+
+    app = Flask('mpmtest')
+
+    # suppresses XSS protection for testing accross devices
+    CORS(app)
+
+    # register blueprints to pull in different bits of functionality
+    app.register_blueprint(api, url_prefix='/api')
+
+    # Serve me, serve me, serve me my pages down...
+    app.run('0.0.0.0', port=args.port, debug=args.logging_level < logging.INFO, threaded=True)
+
+def init_log():
+    global log
+    fmt = ""
+    if args.log_timestamps:
+        process_name = os.path.basename(sys.argv[0])
+        fmt += '%%(asctime)s %s[%%(process)d] ' % process_name
+    fmt += '%(levelname)s: %(message)s'
+    logging.basicConfig(format=fmt, level=args.logging_level)
+    log = logging
+    mpm.api.log = log
+
+if __name__ == '__main__':
+    import argparse
+    global args
+
+    parser = argparse.ArgumentParser(description='MPM Test API')
+    parser.add_argument('--debug', dest='logging_level', action='store_const',
+        const=logging.DEBUG, default=logging.WARNING, 
+        help='write debugging output in the log')
+    parser.add_argument('--info', dest='logging_level', action='store_const',
+        const=logging.INFO, default=logging.WARNING, 
+        help='write debugging output in the log')
+    parser.add_argument('-p', '--port', dest='port', type=int, default=8888,
+        help='specify the port which sensoweb will listen on')
+    parser.add_argument('--log-ts', dest='log_timestamps',
+        action='store_const', const=True, default=False,
+        help='write informational output in the log')
+    args = parser.parse_args()
+
+    main()
