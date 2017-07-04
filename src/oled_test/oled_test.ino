@@ -37,6 +37,7 @@
 #include <MutilaDebug.h>
 #include <U8g2lib.h>
 
+
 #ifdef U8X8_HAVE_HW_SPI
 #include <SPI.h>
 #endif
@@ -44,21 +45,28 @@
 #include <Wire.h>
 #endif
 
-U8G2_SSD1306_128X64_NONAME_F_SW_I2C u8g2(U8G2_R0, /* clock=*/ D6, /* data=*/ D5, /* reset=*/ D0);
+#include "OLED.h"
+#include "Config.h"
+
+const char hj[] = {'L', 'C', 'R'};
+const char vj[] = {'T', 'M', 'B'};
 
 void setup(void) {
-  DBBEGIN;
-  delay(100);
-  u8g2.begin();
-  DBLN("\n\nE:setup");
+    DBBEGIN;
+    delay(100);
+    OLED.begin();
 }
 
 void loop(void) {
-  u8g2.clearBuffer();					// clear the internal memory
-  u8g2.setFont(u8g2_font_ncenB14_tr);	// choose a suitable font
-  u8g2.drawStr(random(20),random(20)+40,"Hello World!");	// write something to the internal memory
-  u8g2.sendBuffer();					// transfer internal memory to the display
-  DBLN("did a thing");
-  delay(100);  
+    for (uint8_t v=0; v<3; v++) {
+        for (uint8_t h=0; h<3; h++) {
+            DB("h="); 
+            DB(hj[h]); 
+            DB(" v="); 
+            DBLN(vj[v]); 
+            OLED.displayText("All your base are belong to us", hj[h], vj[v]);
+            delay(1500);  
+        }
+    }
 }
 
