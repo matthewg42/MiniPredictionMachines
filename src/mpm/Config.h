@@ -36,3 +36,7 @@ const uint8_t WEATHER_PACKET_MAGIC[]    = {0x12, 0x13};
 // How long to wait before discarding partially-received weather data
 const uint16_t PACKET_READ_TIMEOUT_MS   = 200;
 
+#define OLED_MESSAGE_FONT               u8g2_font_helvR08_tf
+const uint8_t OLED_MESSAGE_FONT_HEIGHT  = 8;
+const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
+
