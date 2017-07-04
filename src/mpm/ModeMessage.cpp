@@ -17,10 +17,7 @@ ModeMessage_::ModeMessage_()
 void ModeMessage_::begin()
 {
     DBLN(F("ModeMessage::begin"));
-    display("one");
-    yield();
-    delay(2000);
-    display("one and two and three");
+    display("Connecting to Wifi...");
 }
 
 void ModeMessage_::modeStart()
@@ -66,8 +63,6 @@ void ModeMessage_::display(String message)
     String lineText[maxLines];
     uint8_t lines = 0;
     int8_t lastSpace = -1;
-    DB(F("maxLines="));
-    DBLN(maxLines);
     for (uint8_t i=0; message[i]!=0; i++) {
         if (message[i] == '\r' || message[i] == '\n' || message[i] == '|') {  
             // explicit line break
@@ -110,11 +105,11 @@ void ModeMessage_::display(String message)
     // Work out where to put it
     for (uint8_t i = 0; i<lines; i++) {
         uint8_t ypos = MESSAGE_FONT_HEIGHT + ((MESSAGE_FONT_HEIGHT+MESSAGE_FONT_VSEP)*i);
-        DB(F("ypos="));
-        if (ypos < 10) { DB("0"); }
-        DB(ypos);
-        DB(F(" line="));
-        DBLN(lineText[i]);
+        //DB(F("ypos="));
+        //if (ypos < 10) { DB("0"); }
+        //DB(ypos);
+        //DB(F(" line="));
+        //DBLN(lineText[i]);
         OLED.drawStr(0, ypos, lineText[i].c_str());
     }
     OLED.sendBuffer();                     // transfer internal memory to the display

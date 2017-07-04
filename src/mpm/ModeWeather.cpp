@@ -8,6 +8,11 @@
 #include "HC12Serial.h"
 #include "Config.h"
 
+// for system_get_free_heap_size()
+extern "C" {
+    #include "user_interface.h"
+}
+
 ModeWeather_ ModeWeather;
 
 ModeWeather_::ModeWeather_() :
@@ -134,6 +139,7 @@ void ModeWeather_::uploadThingspeak()
     url.replace("{5}", String(packet.data.rainFallMmHour, 3));
     url.replace("{6}", String(packet.data.rainFallMmDay, 3));
     url.replace("{7}", String(packet.data.batteryVoltage, 3));
+    url.replace("{8}", String(system_get_free_heap_size()));
 
     yield();
 

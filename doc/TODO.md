@@ -1,7 +1,10 @@
-- status messaged on OLED screen (e.g. "connecting to WiFi...")
+- OLED message scrolling / paging
+- Status messages in Esp (hooks)
+- Only make message API call if there is much time from the next data upload
+   - Trigger some seconds after receiving serial?
 - styling the Access Point setup page
 - longitude/latitude settings in config
-- message display code
-- "get message" API call (waiting on Dom)
-- "put data" API call (waiting on Dom)
+- final "get message" API call (waiting on Dom)
+- final "put data" API call (waiting on Dom)
 - test with final PCBs (waiting for delivery boards from China)
+- 
