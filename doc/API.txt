@@ -1,0 +1,95 @@
+Security
+========
+1. Requests need to include a Unix UTC timestamp parameter called "now" set to
+   the current time.
+2. Requests need to include a parameter called "pubkey" containing the API
+   public key. Note: do not include the private key.
+3. Requests need to include a parameter called "hmac". The value should be a
+   SHA256 hash of all of the other parameters in alphabetical ascending order
+   being sent in the request (including "pubkey", "now" and any other parameter
+   for the given method).
+
+Base Url
+========
+TBD
+
+Keys
+====
+Keys in api_keys.txt, which will not be added to git repo
+
+API
+===
+
+Register
+--------
+Method: GET
+Description:
+  Registers an account for a mini-machine on the server.
+URL Structure: 
+  /register?now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]
+Parameters:
+  now: As above
+  pubkey: As above
+  did: Unique device ID
+  dkey: A device key (password), I suggest that each device randomly generates
+        a key of around 10 characters when it starts up. This key should
+        be used in subsequent requests to authenticate the device. I think this
+        is necessary because each mini-machine will be sharing the same
+        public/private key pair.
+  hmac: As above
+Response: text/plain
+  Response code 200 on success with an empty body, error response codes will
+  contain a body with an error message in plain text.
+     
+
+Get Current Message
+-------------------
+Method: GET
+Description:
+  Gets the current message for the mini-machine to display.
+URL Structure:
+  /current_message?now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]
+Parameters:
+  now: As above
+  pubkey: As above
+  did: As above
+  dkey: As above
+  hmac: As above
+Response: application/json
+  {
+    message: [string], // The message to display
+    expiry: [integer] // Unix timestamp (UTC) that the message should expire on
+  }
+
+
+Send Data
+---------
+Method: POST
+Description:
+  Bulk upload of sensor readings to the server.
+URL Structure:
+  /upload
+Body: application/x-www-form-urlencoded
+  now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]&data=[data]
+Parameters:
+  now: As above
+  pubkey: As above
+  did: As above
+  dkey: As above
+  hmac: As above
+  data: Base64 encoded JSON according to the following structure
+          {
+            "measurement_type": [[utc_timestamp, "value"], ...],
+            ...
+          }
+        where: 
+          measurement_type is the type of sensor reading, e.g. temperature,
+            we'll need to define a list of these.
+          utc_timestamp is a Unix timestamp.
+          value is the value of the reading.
+       e.g.
+         {
+           "temperature": [ [100, "20"], [200, "21"] ],
+           "rainfall": [ [101, "200"], [102, "200"], [103, "201"] ]
+         }
+        
