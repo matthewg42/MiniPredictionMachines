@@ -20,11 +20,11 @@ messages = ['It\'s not that easy being green',
 'And people tend to pass you over \'cause you\'re not standing out like flashy sparkles in the water- or stars in the sky.']
 
 # net API route implementations
-@api.route('/message', methods=['GET'])
+@api.route('/current_message', methods=['GET'])
 def api_message():
     return(messages[random.randint(0,len(messages)-1)])
 
-@api.route('/add', methods=['POST'])
+@api.route('/upload', methods=['POST'])
 def api_add():
     try:
         assert request.method == 'POST'

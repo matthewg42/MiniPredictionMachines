@@ -19,7 +19,7 @@ def main():
     CORS(app)
 
     # register blueprints to pull in different bits of functionality
-    app.register_blueprint(api, url_prefix='/api')
+    app.register_blueprint(api, url_prefix='')
 
     # Serve me, serve me, serve me my pages down...
     app.run('0.0.0.0', port=args.port, debug=args.logging_level < logging.INFO, threaded=True)
