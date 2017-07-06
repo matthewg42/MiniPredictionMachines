@@ -6,6 +6,7 @@
 #include "ModeWeather.h"
 #include "ModeRealTime.h"
 #include "HC12Serial.h"
+#include "OLED.h"
 #include "Config.h"
 
 // for system_get_free_heap_size()
@@ -16,7 +17,9 @@ extern "C" {
 ModeWeather_ ModeWeather;
 
 ModeWeather_::ModeWeather_() :
-    lastSeq(0)
+    lastSeq(0),
+    messageTimer(0),
+    messageGot(false)
 {
     resetData();
 }
@@ -56,6 +59,7 @@ void ModeWeather_::modeUpdate()
             // do the magic...
             magicBuf[magicPtr++] = (uint8_t)c;
             if (!checkMagic()) { 
+                DBLN(F("bad magic"));
                 resetData(); 
                 break; 
             }
@@ -71,12 +75,50 @@ void ModeWeather_::modeUpdate()
             }
         }
     }
+
+    // Decide if we need to update the message
+    if (!messageGot && Millis() > messageTimer + (OLED_MESSAGE_DELAY_S*1000)) {
+        updateMessage();
+    }
+
+    // Blank message if it's been there for ages
+    if (messageGot && Millis() > messageTimer + (OLED_MESSAGE_BLANK_S*1000)) {
+        DBLN(F("message timeout"));
+        messageGot = false;
+        OLED.clearBuffer();
+        OLED.sendBuffer();
+    }
+}
+
+void ModeWeather_::updateMessage()
+{
+    DBLN(F("updateMessage"));
+    messageTimer = Millis();
+
+    // This might take a little while, so give the ESP a chance to do it's stuff
+    yield();
+
+    HTTPClient http;
+    http.begin(API_URL_MESSAGE);
+    int httpCode = http.GET();
+    if (httpCode == 200) {
+        OLED.displayText(http.getString().c_str(), 'C', 'M');
+    } else {
+        DB(F("failed, code="));
+        DBLN(httpCode);
+    }
+    messageGot = true;
 }
 
 void ModeWeather_::handleData()
 {
+    messageTimer = Millis();
+    messageGot = false;
+
     if (!weatherPacketCsTest(&packet.data)) {
         DBLN(F("bad checksum"));
+    } else {
+        DBLN(F("good checksum"));
     }
 
     // Only handle a given message once

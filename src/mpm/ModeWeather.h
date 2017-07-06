@@ -14,6 +14,7 @@ public:
     void modeStop();
     void modeUpdate();
     void handleData();
+    void updateMessage();
 
 protected:
     uint8_t magicBuf[2];
@@ -21,8 +22,10 @@ protected:
     bool inPacket;
     uint8_t dataPtr;
     WeatherUnion packet;
-    unsigned long lastRead;
+    uint32_t lastRead;
     uint32_t lastSeq;
+    uint32_t messageTimer;
+    bool messageGot;
 
     void resetData();
     bool checkMagic();

@@ -15,28 +15,30 @@ const uint8_t HEARTBEAT_PIN             = D8;
 const bool HEARTBEAT_INV                = false;
 
 // Status messages and such
-const char SET_ACCT_UPD[] PROGMEM       = "Account Updated";
-const char SET_NTP_SERVER[] PROGMEM     = "Time Server";
+#define SET_ACCT_UPD                    "Account Updated"
+#define SET_NTP_SERVER                  "Time Server"
 
 // How often to try to sync time with NTP server
-const uint16_t NTP_REFRESH_PERIOD_S     = 1800;
+const uint32_t NTP_REFRESH_PERIOD_S     = 1800;
 
 // When NTP fails, how long to wait before re-try
-const uint16_t NTP_RETRY_PERIOD_S       = 10;
+const uint32_t NTP_RETRY_PERIOD_S       = 10;
 
 // How long after receipt of weather data we check for a new message
-const uint16_t OLED_MESSAGE_DELAY_S     = 8;
+const uint32_t OLED_MESSAGE_DELAY_S     = 30;
 
 // How many seconds to display a message for
-const uint16_t OLED_MESSAGE_BLANK_S     = 300;
+const uint32_t OLED_MESSAGE_BLANK_S     = 90;
 
 // Used to identify start of incoming weather data on HC12
 const uint8_t WEATHER_PACKET_MAGIC[]    = {0x12, 0x13};
 
 // How long to wait before discarding partially-received weather data
-const uint16_t PACKET_READ_TIMEOUT_MS   = 200;
+const uint32_t PACKET_READ_TIMEOUT_MS   = 200;
 
 #define OLED_MESSAGE_FONT               u8g2_font_helvR08_tf
 const uint8_t OLED_MESSAGE_FONT_HEIGHT  = 8;
 const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
+
+#define API_URL_MESSAGE                 "http://192.168.1.14:8888/api/message"
 
