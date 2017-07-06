@@ -7,4 +7,9 @@
 - final "get message" API call (waiting on Dom)
 - final "put data" API call (waiting on Dom)
 - test with final PCBs (waiting for delivery boards from China)
-- 
+- dkey generation / storage
+- registration API call
+- hard reset (both buttons on at powerup?) - will reset dkey
+   - EspAPConf hard reset
+   - Hidden / readonly settings
+   - Callback OR button to trigger AP mode
