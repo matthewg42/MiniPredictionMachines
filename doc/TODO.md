@@ -1,15 +1,5 @@
-- OLED message scrolling / paging
-- Status messages in Esp (hooks)
-- Only make message API call if there is much time from the next data upload
-   - Trigger some seconds after receiving serial?
-- styling the Access Point setup page
-- longitude/latitude settings in config
-- final "get message" API call (waiting on Dom)
-- final "put data" API call (waiting on Dom)
-- test with final PCBs (waiting for delivery boards from China)
-- dkey generation / storage
-- registration API call
-- hard reset (both buttons on at powerup?) - will reset dkey
-   - EspAPConf hard reset
-   - Hidden / readonly settings
-   - Callback OR button to trigger AP mode
+- OLED to display last received data by default
+- Firmware version on "splash" screen
+- Test with final PCBs (waiting for delivery boards from China)
+- Measure bandwidth usage & do calculations
+
