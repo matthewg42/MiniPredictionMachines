@@ -15,8 +15,9 @@ const uint8_t HEARTBEAT_PIN             = D8;
 const bool HEARTBEAT_INV                = false;
 
 // Status messages and such
-#define SET_ACCT_UPD                    "Account Updated"
 #define SET_NTP_SERVER                  "Time Server"
+#define SET_LONGITUDE                   "Longitude"
+#define SET_LATITUDE                    "Latitude"
 
 // How often to try to sync time with NTP server
 const uint32_t NTP_REFRESH_PERIOD_S     = 1800;

@@ -4,7 +4,7 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
-#include <PersistentSettingBool.h>
+#include <PersistentSettingFloat.h>
 #include <PersistentSettingString.h>
 #include <EspApConfigurator.h>
 #include <ModeWifiClient.h>
@@ -56,8 +56,9 @@ void setup()
     // easier as I don't have to keep connecting to the AP to see
     // how the interface is being rendered...
     //ModeWifiClient.enableHttpServer(true);
-    EspApConfigurator.addSetting(SET_ACCT_UPD,   new PersistentSettingBool(EspApConfigurator.nextFreeAddress(),   false));
     EspApConfigurator.addSetting(SET_NTP_SERVER, new PersistentSettingString(EspApConfigurator.nextFreeAddress(), 64, "time.google.com"));
+    EspApConfigurator.addSetting(SET_LATITUDE,   new PersistentSettingFloat(EspApConfigurator.nextFreeAddress(), 0, 5));
+    EspApConfigurator.addSetting(SET_LONGITUDE,  new PersistentSettingFloat(EspApConfigurator.nextFreeAddress(), 0, 5));
 
     DBLN(F("E:setup"));
 }
