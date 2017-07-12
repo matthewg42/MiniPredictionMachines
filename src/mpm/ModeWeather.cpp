@@ -7,6 +7,7 @@
 #include "ModeRealTime.h"
 #include "HC12Serial.h"
 #include "OLED.h"
+#include "EspID.h"
 #include "Config.h"
 
 // for system_get_free_heap_size()
@@ -100,23 +101,33 @@ void ModeWeather_::updateMessage()
 
     // This might take a little while, so give the ESP a chance to do it's stuff
     yield();
-
+    
+    // example URL: /current_message?now=123456789&pubkey=XXXXX&did=0EA4F2&hmac=a65238b87fed...
     String url = API_BASE_URL;
-    url += F("/current_message");
+    url += F("/current_message?now=");
+    url += ModeRealTime.unixTime();
+    url += F("&pubkey=");
+    url += F(TIMESTREAMS_API_PUBKEY);
+    url += F("&did=");
+    url += EspID.get();
+    url += F("&hmac=TODO");
     HTTPClient http;
     http.begin(url);
     int httpCode = http.GET();
     if (httpCode == 200) {
         // We expect e|message, where e is expiry time in unix seconds, and message is 
         // the text we want to display.  Note: message may contain embedded | characters
+        String body = http.getString();
+        DB(F("http OK, body: "));
+        DBLN(body);
         uint8_t i = 0;
         String expiryStr = "";
-        while(i < http.getString().length()) {
-            if (http.getString()[i] == '|') {
+        while(i < body.length()) {
+            if (body[i] == '|') {
                 i++;
                 break;
             } else {
-                expiryStr += http.getString()[i];
+                expiryStr += body[i];
                 i++;
             }
         }
@@ -124,21 +135,21 @@ void ModeWeather_::updateMessage()
         messageTimeout = expiryStr.toInt();
 
         // Copy the rest of the string to "message"
-        String message = http.getString().substring(i);
+        body = body.substring(i);
 
-        DB(F("/current_message API call response body: \""));
-        DB(http.getString());
-        DBLN('\"');
         DB(F("expiryStr="));
         DB(expiryStr);
         DB(F(" messageTimeout="));
         DB(messageTimeout);
         DB(F(" message=\""));
+        DB(body);
         DBLN('\"');
-        OLED.displayText(message.c_str(), 'C', 'M');
+        OLED.displayText(body.c_str(), 'C', 'M');
     } else {
         DB(F("failed, code="));
-        DBLN(httpCode);
+        DB(httpCode);
+        DB(F(" body="));
+        DBLN(http.getString());
     }
     messageGot = true;
 }
