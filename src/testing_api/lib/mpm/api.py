@@ -37,9 +37,12 @@ def api_message():
         # Where: 
         #  e       = expiry time expressed as unix seconds
         #  message = message in ASCII
-        expiry = int(time.time()) + random.randint(3,8)
-        message = messages[random.randint(0,len(messages)-1)]
-        return(plaintext_resp("%s|%s" % (expiry, message)))
+        if random.randint(0,30) == 1:
+            expiry = int(time.time()) + random.randint(5,300)
+            message = messages[random.randint(0,len(messages)-1)]
+            return(plaintext_resp("%s|%s" % (expiry, message)))
+        else:
+            return(plaintext_resp(""))
     except Exception as e:
         return(plaintext_resp('ERROR: %s' % str(e), 400))
 
