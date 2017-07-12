@@ -269,16 +269,20 @@ void ModeWeather_::uploadThingspeak()
 
     http.begin(url.c_str());
     int httpCode = http.GET();
+    DB(F("Thingspeak response: code="));
+    DB(httpCode);
+    DB(F(" body="));
+    DB(httpCode);
     if (httpCode > 0) {
-        String payload = http.getString();
-        DB(F("Thingspeak response: "));
-        DBLN(payload);
+        DBLN(http.getString());
+    } else {
+        DBLN(F("[none]"));
     }
 }
 
 void ModeWeather_::uploadTimestreams()
 {
-    // HTTPClient http;
+    HTTPClient http;
     String url = API_BASE_URL;
     url += F("/upload?now=");
     url += ModeRealTime.unixTime();
@@ -308,5 +312,17 @@ void ModeWeather_::uploadTimestreams()
     url += F("&hmac=TODO");
     DB(F("ModeWeather::uploadTimestreams url="));
     DBLN(url);
+    yield();
+    http.begin(url.c_str());
+    int httpCode = http.GET();
+    DB(F("Timestreams response: code="));
+    DB(httpCode);
+    DB(F(" body="));
+    DB(httpCode);
+    if (httpCode > 0) {
+        DBLN(http.getString());
+    } else {
+        DBLN(F("[none]"));
+    }
 }
 
