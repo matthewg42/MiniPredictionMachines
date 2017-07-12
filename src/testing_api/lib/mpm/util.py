@@ -22,3 +22,10 @@ def json_resp(j, status=200):
     return(nocache(Response(response=json_dump(j),
                     status=status,
                     mimetype="application/json")))
+
+def plaintext_resp(text, status=200):
+    return(nocache(Response(response=text,
+                    status=status,
+                    mimetype="application/plain")))
+
+

@@ -7,7 +7,8 @@ import jsonmerge
 import random
 import hmac
 import hashlib
-from mpm.util import json_resp
+import time
+from mpm.util import plaintext_resp
 from flask import Blueprint, render_template, Response, request
 
 log = logging
@@ -28,14 +29,21 @@ messages = ['It\'s not that easy being green',
 def api_message():
     try:
         validate_params(request.args)
-        return(json_resp({'status': 'ok', 'message': messages[random.randint(0,len(messages)-1)]}))
+        # Format: e|message
+        # Where: 
+        #  e       = expiry time expressed as unix seconds
+        #  message = message in ASCII
+        expiry = int(time.time()) + random.randint(10,60)
+        message = messages[random.randint(0,len(messages)-1)]
+        return("%s|%s" % (expiry, message))
     except Exception as e:
-        return(json_resp({'status': 'error', 'error_message': str(e)}), 400)
+        return(plaintext_resp('ERROR: %s' % str(e), 400))
 
 @api.route('/upload', methods=['POST'])
 def api_add():
     try:
         assert request.method == 'POST'
+        validate_params(request.form)
         te = request.form['temperatureC']
         ws = request.form['windspeedMs']
         mo = request.form['moisture']
@@ -48,12 +56,8 @@ def api_add():
         print('api_add SUCCESS TE=%s WS=%s MO=%s RM=%s RH=%s RD=%s BV=%s LA=%s LO=%s' % (
                 te, ws, mo, rm, rh, rd, bv, la, lo )) 
     except Exception as e:
-        return(json_resp({"error":"Internal server error", "message": "%s : %s" % (type(e), str(e))}, 400))
-    return(json_resp({'status': 'ok'}))
-
-@api.route('/register', methods=['POST', 'GET'])
-def api_register():
-    return json_resp({'status': '/register TODO'})
+        return(plaintext_resp('ERROR: %s' % str(e), 400))
+    return(plaintext_resp('ok'))
 
 def calc_hmac(params):
     values = [str(v) for k, v in params.items() if k != 'hmac']
@@ -68,7 +72,7 @@ def calc_hmac(params):
 def validate_params(params):
     ok = True
     messages = []
-    for p in ['now', 'pubkey', 'did', 'dkey', 'hmac']:
+    for p in ['now', 'pubkey', 'did', 'hmac']:
         if p not in params:
             messages.append(p)
             ok = False
@@ -86,13 +90,9 @@ def validate_params(params):
         messages.append("param 'did' should be 6 characters long")
         ok = False
 
-    if len(params['dkey']) != 10:
-        messages.append("param 'dkey' should be length 10")
-        ok = False
-
-    if calc_hmac(params) != params['hmac']:
-        messages.append("HMAC authentication failed")
-        ok = False
+    #if calc_hmac(params) != params['hmac']:
+    #    messages.append("HMAC authentication failed")
+    #    ok = False
 
     if not ok:
         raise Exception('; '.join(messages))
