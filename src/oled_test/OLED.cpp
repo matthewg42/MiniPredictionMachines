@@ -19,6 +19,11 @@ u8g2_uint_t OLEDClass::getCharWidth(char c)
     return OLED.getStrWidth(buf);
 }
 
+u8g2_uint_t OLEDClass::drawStrR(u8g2_uint_t x, u8g2_uint_t y, const char *s)
+{
+    return drawStr(x-getStrWidth(s), y, s);
+}
+
 void OLEDClass::displayText(const char* text, char hAlign, char vAlign)
 {
     DB(F("ModeMessage::display "));

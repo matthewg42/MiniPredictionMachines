@@ -18,6 +18,12 @@ public:
     // Get the width of a single character
     u8g2_uint_t getCharWidth(char c);
 
+    // Like drawStr, but right justified
+    // \param x the x position of the right-most pixel of the text
+    // \param y the bottom most pixel of the text
+    // \param s the string to draw
+    u8g2_uint_t drawStrR(u8g2_uint_t x, u8g2_uint_t y, const char *s);
+
     // Display text, wrapped, centred
     // \param text the text to display
     // \param hAlign horizontal alignment: L C R
