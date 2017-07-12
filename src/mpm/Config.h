@@ -47,3 +47,6 @@ const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 // Should not contain trailing / - it will be added when used
 #define API_BASE_URL                F("http://192.168.1.14:8888")
 
+// How many parameters we might have in an API call (including hmac)
+#define HTTP_PARAMIZER_MAX_PARAMS   12
+

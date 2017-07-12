@@ -8,6 +8,7 @@
 #include "HC12Serial.h"
 #include "OLED.h"
 #include "EspID.h"
+#include "HttpParamizer.h"
 #include "Config.h"
 
 // for system_get_free_heap_size()
@@ -104,15 +105,17 @@ void ModeWeather_::updateMessage()
     
     // example URL: /current_message?now=123456789&pubkey=XXXXX&did=0EA4F2&hmac=a65238b87fed...
     String url = API_BASE_URL;
-    url += F("/current_message?now=");
-    url += ModeRealTime.unixTime();
-    url += F("&pubkey=");
-    url += F(TIMESTREAMS_API_PUBKEY);
-    url += F("&did=");
-    url += EspID.get();
-    url += F("&hmac=TODO");
+    url += F("/current_message");
+    HttpParamizer params(url);
+    params.add(String(F("now")),    String(ModeRealTime.unixTime()));
+    params.add(String(F("pubkey")), String(TIMESTREAMS_API_PUBKEY));
+    params.add(String(F("did")),    String(EspID.get()));
+    params.addHmac(String(TIMESTREAMS_API_PUBKEY), String(TIMESTREAMS_API_PRIKEY), String(F("hmac")));
     HTTPClient http;
-    http.begin(url);
+    url = params.getUrl();
+    DB(F("url="));
+    DBLN(url);
+    http.begin(url.c_str());
     int httpCode = http.GET();
     if (httpCode == 200) {
         // We expect e|message, where e is expiry time in unix seconds, and message is 
