@@ -1,66 +1,61 @@
 Security
 ========
 1. Requests need to include a Unix UTC timestamp parameter called "now" set to
-   the current time.
+   the current time. The server allows for 5 minutes grace on either side
+   of the current time to allow for clock differences.
 2. Requests need to include a parameter called "pubkey" containing the API
    public key. Note: do not include the private key.
 3. Requests need to include a parameter called "hmac". The value should be a
    SHA256 hash of all of the other parameters in alphabetical ascending order
-   being sent in the request (including "pubkey", "now" and any other parameter
-   for the given method).
+   being sent in the request (including "pubkey", "now" and any other
+   parameter. The general algorithm is:
+     a. Sort the list of parameter values alphabetically.
+     b. For each value pair append an '&' character.
+     c. Join all the values together.
+     d. Calculate the HMAC on that string.
+
+Dates/Times
+===========
+The API provides/expects times to be in UTC.
 
 Base Url
 ========
-TBD
+http[s]://future.thepredictionmachine.org/wp-content/plugins/the-future-machine/api/v1
 
 Keys
 ====
-Keys in api_keys.txt, which will not be added to git repo
+[see non-git file api_keys.txt]
 
 API
 ===
-
-Register
---------
-Method: GET
-Description:
-  Registers an account for a mini-machine on the server.
-URL Structure: 
-  /register?now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]
-Parameters:
-  now: As above
-  pubkey: As above
-  did: Unique device ID
-  dkey: A device key (password), I suggest that each device randomly generates
-        a key of around 10 characters when it starts up. This key should
-        be used in subsequent requests to authenticate the device. I think this
-        is necessary because each mini-machine will be sharing the same
-        public/private key pair.
-  hmac: As above
-Response: text/plain
-  Response code 200 on success with an empty body, error response codes will
-  contain a body with an error message in plain text.
-     
-
 Get Current Message
 -------------------
 Method: GET
 Description:
   Gets the current message for the mini-machine to display.
 URL Structure:
-  /current_message?now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]
+  /current_message?now=[now]&pubkey=[pubkey]&did=[did]&hmac=[hmac]
 Parameters:
   now: As above
   pubkey: As above
-  did: As above
-  dkey: As above
+  did: Device ID
   hmac: As above
-Response: application/json
-  {
-    message: [string], // The message to display
-    expiry: [integer] // Unix timestamp (UTC) that the message should expire on
-  }
+HMAC Computation:
+    HMAC of did=[did]&now=[now]&pubkey=[pubkey]
+Response: text/plain; charset=us-ascii
+  [timestamp]|[message]
+  where:
+    timestamp = Unix timestamp
+    message = ASCII string with line-breaks converted to the pipe symbol (|)
+  e.g:
+  1499875978|This message has a|line break
+  An empty body is returned if there is no current message.
 
+cURL Example:
+  curl "http://future.thepredictionmachine.org/wp-content/plugins/
+  the-future-machine/api/v1/current_message?now=1499359832&pubkey=
+  51655f7983&did=dominic&hmac=
+  737c3053217dcc7e1d6e4c6985c8163ca26adfdc48e7fbd3e0e532ccf208ed2a"
 
 Send Data
 ---------
@@ -70,26 +65,29 @@ Description:
 URL Structure:
   /upload
 Body: application/x-www-form-urlencoded
-  now=[now]&pubkey=[pubkey]&did=[did]&dkey=[dkey]&hmac=[hmac]&data=[data]
+  now=[now]&pubkey=[pubkey]&did=[did]&hmac=[hmac]&[sensor]=[value]...
 Parameters:
   now: As above
   pubkey: As above
   did: As above
-  dkey: As above
   hmac: As above
-  data: Base64 encoded JSON according to the following structure
-          {
-            "measurement_type": [[utc_timestamp, "value"], ...],
-            ...
-          }
-        where: 
-          measurement_type is the type of sensor reading, e.g. temperature,
-            we'll need to define a list of these.
-          utc_timestamp is a Unix timestamp.
-          value is the value of the reading.
-       e.g.
-         {
-           "temperature": [ [100, "20"], [200, "21"] ],
-           "rainfall": [ [101, "200"], [102, "200"], [103, "201"] ]
-         }
+  [sensor]: The sensor name, available names:
+    temperatureC
+    windspeedMs
+    moisture
+    rainfallMmHour
+    rainfallMmMinute
+    rainfallMmDay
+    batteryVoltage
+    longitude
+    latitide
+  [value]: The sensor reading
+  N.B. Each sensor name/value pair is optional, but each can only appear once.
+Reponse: Empty, response code 200 for success.
+cURL Example:
+  curl "http://future.thepredictionmachine.org/wp-content/plugins/ 
+  the-future-machine/api/v1/upload"
+  -d "now=1499359832&pubkey=51655f7983&did=dominic
+  &hmac=374a806a1555fd2df6bded0a5ff3e896d13e3e8a91ac597d672b225f508c5a6c
+  &windspeedMs=2.2&temperatureC=25.1"
         
