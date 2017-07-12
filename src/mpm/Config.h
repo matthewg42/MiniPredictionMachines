@@ -26,7 +26,7 @@ const uint32_t NTP_REFRESH_PERIOD_S     = 1800;
 const uint32_t NTP_RETRY_PERIOD_S       = 10;
 
 // How long after receipt of weather data we check for a new message
-const uint32_t OLED_MESSAGE_DELAY_S     = 30;
+const uint32_t OLED_MESSAGE_DELAY_S     = 5;
 
 // How many seconds to display a message for
 const uint32_t OLED_MESSAGE_BLANK_S     = 90;
@@ -41,5 +41,6 @@ const uint32_t PACKET_READ_TIMEOUT_MS   = 200;
 const uint8_t OLED_MESSAGE_FONT_HEIGHT  = 8;
 const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 
-#define API_URL_MESSAGE                 "http://192.168.1.14:8888/api/message"
+// Should not contain trailing / - it will be added when used
+#define API_BASE_URL "http://192.168.1.14:8888"
 
