@@ -285,34 +285,25 @@ void ModeWeather_::uploadThingspeak()
 
 void ModeWeather_::uploadTimestreams()
 {
-    HTTPClient http;
     String url = API_BASE_URL;
-    url += F("/upload?now=");
-    url += ModeRealTime.unixTime();
-    url += F("&pubkey=");
-    url += F(TIMESTREAMS_API_PUBKEY);
-    url += F("&did=");
-    url += EspID.get();
+    url += F("/upload");
+    HttpParamizer params(url);
+    params.add(String(F("now")),                String(ModeRealTime.unixTime()));
+    params.add(String(F("pubkey")),             String(TIMESTREAMS_API_PUBKEY));
+    params.add(String(F("did")),                String(EspID.get()));
+    params.add(String(F("temperatureC")),       String(packet.data.temperatureC, 3));
+    params.add(String(F("windspeedMs")),        String(packet.data.windSpeedMs, 3));
+    params.add(String(F("moisture")),           String(packet.data.moisture));
+    params.add(String(F("rainfallMmHour")),     String(packet.data.rainFallMmHour, 3));
+    params.add(String(F("rainfallMmMinute")),   String(packet.data.rainFallMmMinute, 3));
+    params.add(String(F("rainfallMmDay")),      String(packet.data.rainFallMmDay, 3));
+    params.add(String(F("longitude")),          EspApConfigurator[SET_LONGITUDE]->get());
+    params.add(String(F("latitude")),           EspApConfigurator[SET_LATITUDE]->get());
+    params.add(String(F("batteryVoltage")),     String(packet.data.batteryVoltage, 3));
+    params.addHmac(String(TIMESTREAMS_API_PUBKEY), String(TIMESTREAMS_API_PRIKEY), String(F("hmac")));
 
-    url += F("&temperatureC=");
-    url += String(packet.data.temperatureC, 3);
-    url += F("&windspeedMs=");
-    url += String(packet.data.windSpeedMs, 3);
-    url += F("&moisture=");
-    url += String(packet.data.moisture);
-    url += F("&rainfallMmHour=");
-    url += String(packet.data.rainFallMmHour, 3);
-    url += F("&rainfallMmMinute=");
-    url += String(packet.data.rainFallMmMinute, 3);
-    url += F("&rainfallMmDay=");
-    url += String(packet.data.rainFallMmDay, 3);
-    url += F("&longitude=");
-    url += EspApConfigurator[SET_LONGITUDE]->get();
-    url += F("&longitude=");
-    url += EspApConfigurator[SET_LATITUDE]->get();
-    url += F("&batteryVoltage=");
-    url += String(packet.data.batteryVoltage, 3);
-    url += F("&hmac=TODO");
+    HTTPClient http;
+    url = params.getUrl();
     DB(F("ModeWeather::uploadTimestreams url="));
     DBLN(url);
     yield();

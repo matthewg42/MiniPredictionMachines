@@ -12,7 +12,7 @@ public:
 
 private:
     String _baseUrl;
-    uint8_t _params;
+    uint8_t _paramCount;
     String _paramNames[HTTP_PARAMIZER_MAX_PARAMS];
     String _paramValues[HTTP_PARAMIZER_MAX_PARAMS];
 
