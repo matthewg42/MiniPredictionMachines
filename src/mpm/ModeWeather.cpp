@@ -72,7 +72,7 @@ void ModeWeather_::modeUpdate()
         } else {
             packet.bytes[dataPtr++] = (uint8_t)c;
             if (dataPtr >= sizeof(WeatherPacket)) {
-                handleData();
+                checkWeatherPacket();
                 resetData();
             }
         }
@@ -173,7 +173,7 @@ void ModeWeather_::displayLastData()
     }
 }
 
-void ModeWeather_::handleData()
+void ModeWeather_::checkWeatherPacket()
 {
     messageCheckTimer = Millis();
     messageGot = false;
@@ -209,8 +209,16 @@ void ModeWeather_::handleData()
         DB(packet.data.dutyCycle);
         DB(F(" CS="));
         DBLN(packet.data.checksum);
+        handleWeatherData();
+    }
+}
+
+void ModeWeather_::handleWeatherData()
+{
+    if (ModeRealTime.unixTime() > 0) {
         displayLastData();
         uploadThingspeak();
+        uploadTimestreams();
     }
 }
 
@@ -236,8 +244,8 @@ void ModeWeather_::uploadThingspeak()
 {
     HTTPClient http;
     
-    String url = URL_TEMPLATE;
-    url.replace("{k}", API_KEY);
+    String url = THINGSPEAK_URL_TEMPLATE;
+    url.replace("{k}", THINGSPEAK_API_KEY);
     url.replace("{1}", String(packet.data.temperatureC, 3));
     url.replace("{2}", String(packet.data.moisture));
     url.replace("{3}", String(packet.data.windSpeedMs, 3));
@@ -256,5 +264,39 @@ void ModeWeather_::uploadThingspeak()
         DB(F("Thingspeak response: "));
         DBLN(payload);
     }
-
 }
+
+void ModeWeather_::uploadTimestreams()
+{
+    // HTTPClient http;
+    String url = API_BASE_URL;
+    url += F("/upload?now=");
+    url += ModeRealTime.unixTime();
+    url += F("&pubkey=");
+    url += F(TIMESTREAMS_API_PUBKEY);
+    url += F("&did=");
+    url += EspID.get();
+
+    url += F("&temperatureC=");
+    url += String(packet.data.temperatureC, 3);
+    url += F("&windspeedMs=");
+    url += String(packet.data.windSpeedMs, 3);
+    url += F("&moisture=");
+    url += String(packet.data.moisture);
+    url += F("&rainfallMmHour=");
+    url += String(packet.data.rainFallMmHour, 3);
+    url += F("&rainfallMmMinute=");
+    url += String(packet.data.rainFallMmMinute, 3);
+    url += F("&rainfallMmDay=");
+    url += String(packet.data.rainFallMmDay, 3);
+    url += F("&longitude=");
+    url += EspApConfigurator[SET_LONGITUDE]->get();
+    url += F("&longitude=");
+    url += EspApConfigurator[SET_LATITUDE]->get();
+    url += F("&batteryVoltage=");
+    url += String(packet.data.batteryVoltage, 3);
+    url += F("&hmac=TODO");
+    DB(F("ModeWeather::uploadTimestreams url="));
+    DBLN(url);
+}
+

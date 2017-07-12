@@ -95,11 +95,6 @@ void ModeRealTime_::ntpUpdate()
             
             unsigned long newUnix = secsSince1900 - 2208988800UL;
             int diff = newUnix - unixTime();
-            bool displayMessage = false;
-            // First time, display a message saying the time has been set
-            if (_unixTime == 0) {
-                displayMessage = true;
-            }
             _unixTime = newUnix;
             _lastNtpSuccess = Millis();
             DB(F("NTP success: "));
@@ -107,11 +102,6 @@ void ModeRealTime_::ntpUpdate()
             DB(F(" (diff="));
             DB(diff);
             DBLN(')');
-            if (displayMessage) {
-                String s(F("Time set to\n"));
-                s += isoTimestamp();
-                OLED.displayText(s.c_str(), 'C', 'M');
-            }
             return;
         }
     }

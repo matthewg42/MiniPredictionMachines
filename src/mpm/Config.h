@@ -41,6 +41,9 @@ const uint32_t PACKET_READ_TIMEOUT_MS   = 200;
 const uint8_t OLED_MESSAGE_FONT_HEIGHT  = 8;
 const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 
+#define THINGSPEAK_API_KEY          F("GED0JXRS9NWB7LYV")
+#define THINGSPEAK_URL_TEMPLATE     F("http://api.thingspeak.com/update?api_key={k}&field1={1}&field2={2}&field3={3}&field4={4}&field5={5}&field6={6}&field7={7}&field8={8}")
+
 // Should not contain trailing / - it will be added when used
-#define API_BASE_URL "http://192.168.1.14:8888"
+#define API_BASE_URL                F("http://192.168.1.14:8888")
 
