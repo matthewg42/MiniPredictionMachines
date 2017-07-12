@@ -120,31 +120,38 @@ void ModeWeather_::updateMessage()
         String body = http.getString();
         DB(F("http OK, body: "));
         DBLN(body);
-        uint8_t i = 0;
-        String expiryStr = "";
-        while(i < body.length()) {
-            if (body[i] == '|') {
-                i++;
-                break;
-            } else {
-                expiryStr += body[i];
-                i++;
+
+        if (body == "") {
+            DBLN(F("no new message to display"));
+        } else {
+            uint8_t i = 0;
+            String expiryStr = "";
+            while(i < body.length()) {
+                if (body[i] == '|') {
+                    i++;
+                    break;
+                } else {
+                    expiryStr += body[i];
+                    i++;
+                }
             }
+            // Hopefully this doesn't do some funky integer overflow stuff...  :s
+            messageTimeout = expiryStr.toInt();
+
+            // Copy the rest of the string to "message"
+            body = body.substring(i);
+
+            DB(F("expiryStr="));
+            DB(expiryStr);
+            DB(F(" messageTimeout="));
+            DB(messageTimeout);
+            DB(F(" secondsToDisplay="));
+            DB(messageTimeout - ModeRealTime.unixTime());
+            DB(F(" message=\""));
+            DB(body);
+            DBLN('\"');
+            OLED.displayText(body.c_str(), 'C', 'M');
         }
-        // Hopefully this doesn't do some funky integer overflow stuff...  :s
-        messageTimeout = expiryStr.toInt();
-
-        // Copy the rest of the string to "message"
-        body = body.substring(i);
-
-        DB(F("expiryStr="));
-        DB(expiryStr);
-        DB(F(" messageTimeout="));
-        DB(messageTimeout);
-        DB(F(" message=\""));
-        DB(body);
-        DBLN('\"');
-        OLED.displayText(body.c_str(), 'C', 'M');
     } else {
         DB(F("failed, code="));
         DB(httpCode);
