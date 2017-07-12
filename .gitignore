@@ -9,3 +9,4 @@ log/
 **/*.o
 **/__pycache__
 api_keys.txt
+Makefile.apikeys
