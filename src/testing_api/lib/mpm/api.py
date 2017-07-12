@@ -22,7 +22,11 @@ messages = ['It\'s not that easy being green',
 'When I think it could be nicer being red, or yellow or gold-',
 'or something much more colorful like that.',
 'It seems you blend in with so many other ordinary things.',
-'And people tend to pass you over \'cause you\'re not standing out like flashy sparkles in the water- or stars in the sky.']
+'And people tend to pass you over \'cause you\'re not standing out like flashy sparkles in the water- or stars in the sky.',
+'Sitting quietly and looking wise, isn\'t nearly as good, as drinking wine and making a riotous shouting',
+'All your API calls are belong to us.',
+'Spurden or Thing?',
+'An empty list is a sorted list']
 
 # net API route implementations
 @api.route('/current_message', methods=['GET'])
@@ -33,9 +37,9 @@ def api_message():
         # Where: 
         #  e       = expiry time expressed as unix seconds
         #  message = message in ASCII
-        expiry = int(time.time()) + random.randint(10,60)
+        expiry = int(time.time()) + random.randint(3,8)
         message = messages[random.randint(0,len(messages)-1)]
-        return("%s|%s" % (expiry, message))
+        return(plaintext_resp("%s|%s" % (expiry, message)))
     except Exception as e:
         return(plaintext_resp('ERROR: %s' % str(e), 400))
 
