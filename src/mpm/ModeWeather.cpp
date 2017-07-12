@@ -18,7 +18,8 @@ ModeWeather_ ModeWeather;
 
 ModeWeather_::ModeWeather_() :
     lastSeq(0),
-    messageTimer(0),
+    messageCheckTimer(0),
+    messageTimeout(0),
     messageGot(false)
 {
     resetData();
@@ -77,32 +78,64 @@ void ModeWeather_::modeUpdate()
     }
 
     // Decide if we need to update the message
-    if (!messageGot && Millis() > messageTimer + (OLED_MESSAGE_DELAY_S*1000)) {
+    if (!messageGot && Millis() > messageCheckTimer + (OLED_MESSAGE_DELAY_S*1000)) {
         updateMessage();
     }
 
-    // Blank message if it's been there for ages
-    if (messageGot && Millis() > messageTimer + (OLED_MESSAGE_BLANK_S*1000)) {
-        DBLN(F("message timeout"));
-        messageGot = false;
-        OLED.clearBuffer();
-        OLED.sendBuffer();
+    // Work out if we want to timeout the message
+    if (messageTimeout != 0 && ModeRealTime.unixTime() > messageTimeout) {
+        // set messageTimeout to 0 so we don't end up refreshing the OLED every modeUpdate...
+        messageTimeout = 0;
+        displayLastData();
     }
+
 }
 
 void ModeWeather_::updateMessage()
 {
+    // TODO: it might be nice if this was non-blocking, although that does seem like quite
+    // a lot of trouble...
     DBLN(F("updateMessage"));
-    messageTimer = Millis();
+    messageCheckTimer = Millis();
 
     // This might take a little while, so give the ESP a chance to do it's stuff
     yield();
 
+    String url = API_BASE_URL;
+    url += F("/current_message");
     HTTPClient http;
-    http.begin(API_URL_MESSAGE);
+    http.begin(url);
     int httpCode = http.GET();
     if (httpCode == 200) {
-        OLED.displayText(http.getString().c_str(), 'C', 'M');
+        // We expect e|message, where e is expiry time in unix seconds, and message is 
+        // the text we want to display.  Note: message may contain embedded | characters
+        uint8_t i = 0;
+        String expiryStr = "";
+        while(i < http.getString().length()) {
+            if (http.getString()[i] == '|') {
+                i++;
+                break;
+            } else {
+                expiryStr += http.getString()[i];
+                i++;
+            }
+        }
+        // Hopefully this doesn't do some funky integer overflow stuff...  :s
+        messageTimeout = expiryStr.toInt();
+
+        // Copy the rest of the string to "message"
+        String message = http.getString().substring(i);
+
+        DB(F("/current_message API call response body: \""));
+        DB(http.getString());
+        DBLN('\"');
+        DB(F("expiryStr="));
+        DB(expiryStr);
+        DB(F(" messageTimeout="));
+        DB(messageTimeout);
+        DB(F(" message=\""));
+        DBLN('\"');
+        OLED.displayText(message.c_str(), 'C', 'M');
     } else {
         DB(F("failed, code="));
         DBLN(httpCode);
@@ -110,9 +143,28 @@ void ModeWeather_::updateMessage()
     messageGot = true;
 }
 
+void ModeWeather_::displayLastData()
+{
+    DBLN(F("ModeWeather::displayLastData"));
+
+    // only display if the message from the API has:
+    // 1. never been retrieved
+    // 2. expired
+    if (messageTimeout == 0 || messageTimeout < ModeRealTime.unixTime()) {
+        OLED.clearBuffer();               
+        OLED.setFont(OLED_MESSAGE_FONT);  
+        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT, lastDataReceived.c_str());
+        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*2), "Temp (C):");
+        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*3), "Wind (m/s):");
+        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*4), "Moisture?");
+        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*5), "Rain (mm):");
+        OLED.sendBuffer();
+    }
+}
+
 void ModeWeather_::handleData()
 {
-    messageTimer = Millis();
+    messageCheckTimer = Millis();
     messageGot = false;
 
     if (!weatherPacketCsTest(&packet.data)) {
@@ -124,7 +176,8 @@ void ModeWeather_::handleData()
     // Only handle a given message once
     if (packet.data.sequenceNumber != lastSeq) {
         lastSeq = packet.data.sequenceNumber;
-        DB(ModeRealTime.isoTimestamp());
+        lastDataReceived = ModeRealTime.isoTimestamp();
+        DB(lastDataReceived);
         DB(F(" SQ="));
         DB(packet.data.sequenceNumber);
         DB(F(" TE="));
@@ -145,7 +198,7 @@ void ModeWeather_::handleData()
         DB(packet.data.dutyCycle);
         DB(F(" CS="));
         DBLN(packet.data.checksum);
-
+        displayLastData();
         uploadThingspeak();
     }
 }
