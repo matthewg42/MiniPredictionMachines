@@ -14,7 +14,7 @@ RainfallSensorClass::RainfallSensorClass(uint8_t pin) :
 
 void RainfallSensorClass::addPulseMinute()
 {
-    DBLN(F("RainfallSensorClass::addPulseMinute"));
+    DBLN(F("RainfallSensor::addPulseMinute"));
     pulseHistory[ptr] = readPulses();
     ptr = (ptr + 1) % MINUTES_TO_RECORD;
     if (count < MINUTES_TO_RECORD) count++;
@@ -39,8 +39,10 @@ float RainfallSensorClass::rainfallMinutes(uint16_t minutes)
 uint16_t RainfallSensorClass::pulsesInRange(uint16_t from, uint16_t to) 
 {
     uint16_t pulses = 0;
-    for(uint16_t i=from; i<=to && i<MINUTES_TO_RECORD && i<count; i++) {
-        pulses += pulseHistory[i];
+    for(uint16_t i=from; i<=to; i++) {
+        //if (i<MINUTES_TO_RECORD && i<count) {
+            pulses += pulseHistory[i];
+        //}
     }
     return pulses;
 }
