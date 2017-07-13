@@ -300,7 +300,7 @@ void ModeWeather_::uploadTimestreams()
     params.add(String(F("longitude")),          EspApConfigurator[SET_LONGITUDE]->get());
     params.add(String(F("latitude")),           EspApConfigurator[SET_LATITUDE]->get());
     params.add(String(F("batteryVoltage")),     String(packet.data.batteryVoltage, 3));
-    //params.addHmac(TIMESTREAMS_API_PRIKEY, String(F("hmac")));
+    params.addHmac(TimestreamsApiPriKey(), TimestreamsApiPriKeyLen(), String(F("hmac")));
 
     HTTPClient http;
     url = params.getUrl();
