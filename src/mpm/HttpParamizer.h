@@ -7,7 +7,7 @@ class HttpParamizer {
 public:
     HttpParamizer(String url);
     void add(String name, String value);
-    void addHmac(String publicKey, String privateKey, String paramName);
+    void addHmac(const byte* privateKey, unsigned int privateKeyLen, String paramName);
     String getUrl();
 
 private:

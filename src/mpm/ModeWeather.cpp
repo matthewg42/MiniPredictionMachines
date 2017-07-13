@@ -9,6 +9,7 @@
 #include "OLED.h"
 #include "EspID.h"
 #include "HttpParamizer.h"
+#include "TimestreamsApiKey.h"
 #include "Config.h"
 
 // for system_get_free_heap_size()
@@ -110,7 +111,7 @@ void ModeWeather_::updateMessage()
     params.add(String(F("now")),    String(ModeRealTime.unixTime()));
     params.add(String(F("pubkey")), String(TIMESTREAMS_API_PUBKEY));
     params.add(String(F("did")),    String(EspID.get()));
-    params.addHmac(String(TIMESTREAMS_API_PUBKEY), String(TIMESTREAMS_API_PRIKEY), String(F("hmac")));
+    params.addHmac(TimestreamsApiPriKey(), TimestreamsApiPriKeyLen(), String(F("hmac")));
     HTTPClient http;
     url = params.getUrl();
     DB(F("url="));
@@ -299,7 +300,7 @@ void ModeWeather_::uploadTimestreams()
     params.add(String(F("longitude")),          EspApConfigurator[SET_LONGITUDE]->get());
     params.add(String(F("latitude")),           EspApConfigurator[SET_LATITUDE]->get());
     params.add(String(F("batteryVoltage")),     String(packet.data.batteryVoltage, 3));
-    params.addHmac(String(TIMESTREAMS_API_PUBKEY), String(TIMESTREAMS_API_PRIKEY), String(F("hmac")));
+    //params.addHmac(TIMESTREAMS_API_PRIKEY, String(F("hmac")));
 
     HTTPClient http;
     url = params.getUrl();

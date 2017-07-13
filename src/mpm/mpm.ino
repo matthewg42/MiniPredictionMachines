@@ -13,6 +13,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <TimeLib.h>
+#include <Crypto.h>
 
 // Physical devices
 #include "HC12Serial.h"

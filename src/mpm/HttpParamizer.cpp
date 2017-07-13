@@ -1,4 +1,6 @@
+#include <string.h>
 #include <MutilaDebug.h>
+#include <Crypto.h>
 #include "HttpParamizer.h"
 
 HttpParamizer::HttpParamizer(String url) :
@@ -18,7 +20,7 @@ void HttpParamizer::add(String name, String value)
     _paramCount++;
 }
 
-void HttpParamizer::addHmac(String publicKey, String privateKey, String paramName)
+void HttpParamizer::addHmac(const byte* privateKey, unsigned int privateKeyLen, String paramName)
 {
     String sortedValues[HTTP_PARAMIZER_MAX_PARAMS];
     uint8_t count = 0;
@@ -56,8 +58,17 @@ void HttpParamizer::addHmac(String publicKey, String privateKey, String paramNam
     DB(F("HttpParamizer::addHmac hashStr="));
     DBLN(hashString);
 
-    // TODO: Do hmac calculation
-    add(paramName, String("[TODO:hmac]"));
+    // HMAC calculation
+    SHA256HMAC hmac(privateKey, privateKeyLen);
+    hmac.doUpdate(hashString.c_str(), hashString.length());
+    byte digest[SHA256_SIZE];
+    hmac.doFinal(digest);
+    String hexDigest;
+    for (byte i=0; i<SHA256_SIZE; i++) {
+        if (digest[i] < 0x10) { hexDigest += '0'; }
+        hexDigest += String(digest[i], HEX);
+    }
+    add(paramName, hexDigest);
 }
 
 String HttpParamizer::getUrl()
