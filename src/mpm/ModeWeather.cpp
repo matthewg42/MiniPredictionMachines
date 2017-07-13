@@ -275,7 +275,6 @@ void ModeWeather_::uploadThingspeak()
     DB(F("Thingspeak response: code="));
     DB(httpCode);
     DB(F(" body="));
-    DB(httpCode);
     if (httpCode > 0) {
         DBLN(http.getString());
     } else {
@@ -312,7 +311,6 @@ void ModeWeather_::uploadTimestreams()
     DB(F("Timestreams response: code="));
     DB(httpCode);
     DB(F(" body="));
-    DB(httpCode);
     if (httpCode > 0) {
         DBLN(http.getString());
     } else {
