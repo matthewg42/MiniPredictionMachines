@@ -50,3 +50,11 @@ const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 // How many parameters we might have in an API call (including hmac)
 #define HTTP_PARAMIZER_MAX_PARAMS   15
 
+// You can define API key details here, but remember, live API keys should
+// not be commited to the git repo!  We wrap in an #ifdef in case we're
+// building with the Makefile and have used a command-line #define
+#ifndef TIMESTREAMS_API_PRIKEY
+#define TIMESTREAMS_API_PRIKEY "00000000001111111111222222222233"
+#endif
+
+

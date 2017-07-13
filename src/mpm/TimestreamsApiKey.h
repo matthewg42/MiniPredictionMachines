@@ -2,6 +2,7 @@
 
 // #include <string.h>
 #include <Arduino.h>
+#include <Config.h>
 
 const char* TimestreamsApiPriKeySigned = TIMESTREAMS_API_PRIKEY;
 
