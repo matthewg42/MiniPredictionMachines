@@ -175,14 +175,32 @@ void ModeWeather_::displayLastData()
     if (messageTimeout == 0 || messageTimeout < ModeRealTime.unixTime()) {
         OLED.clearBuffer();               
         OLED.setFont(OLED_MESSAGE_FONT);  
-        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*1), "Temp (C):");
-        OLED.drawStrR(127, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*1), String(packet.data.temperatureC, 2).c_str());
-        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*2), "Wind (m/s):");
-        OLED.drawStrR(127, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*2), String(packet.data.windSpeedMs, 2).c_str());
-        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*3), "Moisture?");
-        OLED.drawStrR(127, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*3), packet.data.moisture ? "Yes" : "No");
-        OLED.drawStr(0, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*4), "Rain (mm/24hr):");
-        OLED.drawStrR(127, OLED_MESSAGE_FONT_HEIGHT+((OLED_MESSAGE_FONT_HEIGHT+OLED_MESSAGE_FONT_VSEP)*4), String(packet.data.rainFallMmDay, 2).c_str());
+        uint8_t ypos = OLED_MESSAGE_FONT_HEIGHT;
+#ifdef DISPLAY_BATTERY_VOLTAGE
+        ypos += OLED_MESSAGE_FONT_HEIGHT;
+#else
+        ypos += OLED_MESSAGE_FONT_HEIGHT*1.5;
+#endif
+        OLED.drawStr (0,   ypos, "Temp (C):");
+        OLED.drawStrR(127, ypos, String(packet.data.temperatureC, 2).c_str());
+
+        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
+        OLED.drawStr (0,   ypos, "Wind (m/s):");
+        OLED.drawStrR(127, ypos, String(packet.data.windSpeedMs, 2).c_str());
+
+        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
+        OLED.drawStr (0,   ypos, "Moisture?");
+        OLED.drawStrR(127, ypos, packet.data.moisture ? "Yes" : "No");
+
+        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
+        OLED.drawStr (0,   ypos, "Rain (mm/24hr):");
+        OLED.drawStrR(127, ypos, String(packet.data.rainFallMmDay, 2).c_str());
+
+#ifdef DISPLAY_BATTERY_VOLTAGE
+        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
+        OLED.drawStr (0,   ypos, "Battery (V):");
+        OLED.drawStrR(127, ypos, String(packet.data.batteryVoltage, 2).c_str());
+#endif
         OLED.sendBuffer();
     }
 }
@@ -231,8 +249,12 @@ void ModeWeather_::handleWeatherData()
 {
     if (ModeRealTime.unixTime() > 0) {
         displayLastData();
+#ifdef THINGSPEAK_UPLOAD
         uploadThingspeak();
+#endif
+#ifdef TIMESTREAMS_UPLOAD
         uploadTimestreams();
+#endif
     }
 }
 
