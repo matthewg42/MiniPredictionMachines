@@ -6,8 +6,8 @@
 const uint8_t SW_UP_PIN                 = D0;
 const uint8_t SW_DOWN_PIN               = D4;
 const uint8_t HC12_SET_PIN              = D1;
-const uint8_t HC12_TX_PIN               = D2;
-const uint8_t HC12_RX_PIN               = D3;
+const uint8_t HC12_TX_PIN               = D3;
+const uint8_t HC12_RX_PIN               = D2;
 const uint32_t HC12_BAUD                = 4800;
 const uint8_t OLED_SCK_PIN              = D6;
 const uint8_t OLED_SDA_PIN              = D5;
@@ -45,7 +45,8 @@ const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 #define THINGSPEAK_URL_TEMPLATE     F("http://api.thingspeak.com/update?api_key={k}&field1={1}&field2={2}&field3={3}&field4={4}&field5={5}&field6={6}&field7={7}&field8={8}")
 
 // Should not contain trailing / - it will be added when used
-#define API_BASE_URL                F("http://192.168.1.14:8888")
+//#define API_BASE_URL                F("http://192.168.1.14:8888")
+#define API_BASE_URL                F("http://future.thepredictionmachine.org/wp-content/plugins/the-future-machine/api/v1")
 
 // How many parameters we might have in an API call (including hmac)
 #define HTTP_PARAMIZER_MAX_PARAMS   15
