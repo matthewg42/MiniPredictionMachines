@@ -10,6 +10,7 @@
 #include "EspID.h"
 #include "HttpParamizer.h"
 #include "TimestreamsApiKey.h"
+#include "SWDOWN.h"
 #include "Config.h"
 
 // for system_get_free_heap_size()
@@ -23,7 +24,8 @@ ModeWeather_::ModeWeather_() :
     lastSeq(0),
     messageCheckTimer(0),
     messageTimeout(0),
-    messageGot(false)
+    messageGot(false),
+    forceDataView(false)
 {
     resetData();
 }
@@ -45,6 +47,17 @@ void ModeWeather_::modeStop()
 
 void ModeWeather_::modeUpdate()
 {
+    SWDOWN.update();
+
+    if (SWDOWN.tapped()) {
+        forceDataView = !forceDataView;
+        if (forceDataView) {
+            displayLastData();
+        } else if (ModeRealTime.unixTime() <= messageTimeout) {
+            displayMessage();
+        }
+    }
+
     // Timeout
     if ((magicPtr>0 || dataPtr>0) && Millis() - lastRead > PACKET_READ_TIMEOUT_MS) {
         DBLN(F("timeout"));
@@ -154,7 +167,8 @@ void ModeWeather_::updateMessage()
             DB(F(" message=\""));
             DB(body);
             DBLN('\"');
-            OLED.displayText(body.c_str(), 'C', 'M');
+            lastMessage = body;
+            displayMessage();
         }
     } else {
         DB(F("failed, code="));
@@ -172,7 +186,7 @@ void ModeWeather_::displayLastData()
     // only display if the message from the API has:
     // 1. never been retrieved
     // 2. expired
-    if (messageTimeout == 0 || messageTimeout < ModeRealTime.unixTime()) {
+    if (messageTimeout == 0 || messageTimeout < ModeRealTime.unixTime() || forceDataView) {
         OLED.clearBuffer();               
         OLED.setFont(OLED_MESSAGE_FONT);  
         uint8_t ypos = OLED_MESSAGE_FONT_HEIGHT;
@@ -202,6 +216,13 @@ void ModeWeather_::displayLastData()
         OLED.drawStrR(127, ypos, String(packet.data.batteryVoltage, 2).c_str());
 #endif
         OLED.sendBuffer();
+    }
+}
+
+void ModeWeather_::displayMessage()
+{
+    if (!forceDataView) {
+        OLED.displayText(lastMessage.c_str(), 'C', 'M');
     }
 }
 

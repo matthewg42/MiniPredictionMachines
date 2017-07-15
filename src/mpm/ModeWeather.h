@@ -33,6 +33,9 @@ public:
     // Change the OLED display to show the last received weather data
     void displayLastData();
 
+    // Display the message if it hasn't timed out
+    void displayMessage();
+
 protected:
     uint8_t magicBuf[2];
     uint8_t magicPtr;
@@ -42,9 +45,11 @@ protected:
     uint32_t lastRead;
     uint32_t lastSeq;
     uint32_t messageCheckTimer;
+    String lastMessage;
     String lastDataReceived;
     uint32_t messageTimeout;
     bool messageGot;
+    bool forceDataView;
 
     void resetData();
     bool checkMagic();
