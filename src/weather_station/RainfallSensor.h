@@ -14,8 +14,8 @@ public:
 
 protected:
     uint8_t pulseHistory[MINUTES_TO_RECORD];
-    uint8_t ptr;
-    uint8_t count;
+    uint16_t ptr;
+    uint16_t count;
 
     uint16_t pulsesInRange(uint16_t from, uint16_t to);
 
