@@ -64,6 +64,7 @@ void sendData(uint32_t realMillis)
     data.sequenceNumber = sendSeqNo;
     data.temperatureC = TemperatureSensor.getCelcius();
     data.moisture = MoistureSensor.isMoist();
+    MoistureSensor.power(false);
     data.windSpeedMs = calculateWindspeedMs(WindspeedSensor.readPulses(), realMillis - lastSend);
     data.rainFallMmMinute = RainfallSensor.rainfallMinutes(1);
     data.rainFallMmHour = RainfallSensor.rainfallMinutes(60);
@@ -220,9 +221,10 @@ void loop()
             TemperatureSensor.request();
         }
 
-        // Half a second (one wakeup) before the send, wake up the HC12
+        // Half a second (one wakeup) before the send, wake up the HC12 and moisture sensor
         if (realMillis >= lastSend + tempTime + WDT_PERIOD_MS && realMillis < lastSend + tempTime + (2*WDT_PERIOD_MS)) {
             HC12Serial.wakeup();
+            MoistureSensor.power(true);
         }
 
         if (realMillis >= lastSend + ((uint32_t)SEND_DATA_PERIOD_SEC*1000)) {
