@@ -99,6 +99,7 @@ void sendData(uint32_t realMillis)
     DB(F(" CS="));
     DBLN(data.checksum);
 
+    digitalWrite(LED_WS2811_PIN, HIGH);
     for (uint8_t i=0; i<3; i++) {
         HC12Serial.write(WEATHER_PACKET_MAGIC[0]);
         HC12Serial.write(WEATHER_PACKET_MAGIC[1]);
@@ -106,6 +107,7 @@ void sendData(uint32_t realMillis)
             HC12Serial.write(wu.bytes[j]);
         }
     }
+    digitalWrite(LED_WS2811_PIN, LOW);
     delay(300);
     HC12Serial.sleep();
 }
@@ -147,6 +149,9 @@ void setup()
     WindspeedSensor.begin();
     RainfallSensor.begin();
     BatteryVoltage.begin();
+
+    pinMode(LED_WS2811_PIN, OUTPUT);
+    digitalWrite(LED_WS2811_PIN, LOW);
 
     noInterrupts(); // disable interrupts while we're setting up handlers
 
