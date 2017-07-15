@@ -47,7 +47,7 @@ const uint16_t WDT_PERIOD_MS            = 500;
 // change on the command line or in the Makefile for testing.
 const uint8_t SEND_DATA_PERIOD_SEC      = UPDATE_PERIOD;
 #else
-const uint8_t SEND_DATA_PERIOD_SEC      = 60;
+const uint8_t SEND_DATA_PERIOD_SEC      = 57;
 #endif
 
 // How many seconds to save a chunk of rain data
