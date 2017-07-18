@@ -195,6 +195,10 @@ void ModeWeather_::displayLastData()
 #else
         ypos += OLED_MESSAGE_FONT_HEIGHT*1.5;
 #endif
+        OLED.drawStr (0,   ypos, "Updated:");
+        OLED.drawStrR(127, ypos, ModeRealTime.isoTimestamp().substring(11, 16).c_str());
+
+        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
         OLED.drawStr (0,   ypos, "Temp (C):");
         OLED.drawStrR(127, ypos, String(packet.data.temperatureC, 2).c_str());
 
@@ -203,11 +207,8 @@ void ModeWeather_::displayLastData()
         OLED.drawStrR(127, ypos, String(packet.data.windSpeedMs, 2).c_str());
 
         ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
-        OLED.drawStr (0,   ypos, "Moisture?");
-        OLED.drawStrR(127, ypos, packet.data.moisture ? "Yes" : "No");
-
-        ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
-        OLED.drawStr (0,   ypos, "Rain (mm/24hr):");
+        OLED.drawStr (0,   ypos, "Rain (24hr):");
+        OLED.drawStr (75,  ypos, packet.data.moisture ? "Wet" : "Dry" );
         OLED.drawStrR(127, ypos, String(packet.data.rainFallMmDay, 2).c_str());
 
 #ifdef DISPLAY_BATTERY_VOLTAGE
