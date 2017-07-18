@@ -50,6 +50,7 @@ protected:
     uint32_t messageTimeout;
     bool messageGot;
     bool forceDataView;
+    bool connectedMessageShown;
 
     void resetData();
     bool checkMagic();

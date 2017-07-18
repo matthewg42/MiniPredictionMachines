@@ -25,7 +25,8 @@ ModeWeather_::ModeWeather_() :
     messageCheckTimer(0),
     messageTimeout(0),
     messageGot(false),
-    forceDataView(false)
+    forceDataView(false),
+    connectedMessageShown(false)
 {
     resetData();
 }
@@ -48,6 +49,14 @@ void ModeWeather_::modeStop()
 void ModeWeather_::modeUpdate()
 {
     SWDOWN.update();
+
+    // Display the connected message/reset shown flag
+    if (!EspApConfigurator.isConnected()) {
+        connectedMessageShown = false;
+    } else if (!connectedMessageShown) {
+        OLED.displayText("Connected to WiFi, waiting for weather data...", 'C', 'M');
+        connectedMessageShown = true;
+    }
 
     if (SWDOWN.tapped()) {
         forceDataView = !forceDataView;
