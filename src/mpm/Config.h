@@ -14,6 +14,9 @@ const uint8_t OLED_SDA_PIN              = D5;
 const uint8_t HEARTBEAT_PIN             = D8;
 const bool HEARTBEAT_INV                = false;
 
+// Access point password
+#define AP_PASSPHRASE                   "sunshine"
+
 // Status messages and such
 #define SET_NTP_SERVER                  "Time Server"
 #define SET_LONGITUDE                   "Longitude"

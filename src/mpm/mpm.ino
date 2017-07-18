@@ -52,6 +52,9 @@ void setup()
     ModeWeather.begin();
     ModeRealTime.begin();
     EspApConfigurator.begin(SW_UP_PIN, HEARTBEAT_PIN, HEARTBEAT_INV);
+    String apModeName = "MiniPredictionMachine_";
+    apModeName += EspID.get();
+    EspApConfigurator.setApDetails(apModeName.c_str(), AP_PASSPHRASE);
 
     // Enable web server in ModeWifiClient - this just makes testing
     // easier as I don't have to keep connecting to the AP to see
