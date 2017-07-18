@@ -14,8 +14,7 @@ from flask import Blueprint, render_template, Response, request
 log = logging
 
 api = Blueprint('api', __name__)
-PRIVATE_KEY = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
-PUBLIC_KEY = '1111111111'
+PRIVATE_KEY = os.environ['MPM_API_PRIVATE_KEY']
 
 messages = ['It\'s not that easy being green',
 'Having to spend each day the color of the leaves.',
@@ -46,20 +45,21 @@ def api_message():
     except Exception as e:
         return(plaintext_resp('ERROR: %s' % str(e), 400))
 
-@api.route('/upload', methods=['POST'])
+@api.route('/upload', methods=['POST', 'GET'])
 def api_add():
     try:
-        assert request.method == 'POST'
-        validate_params(request.form)
-        te = request.form['temperatureC']
-        ws = request.form['windspeedMs']
-        mo = request.form['moisture']
-        rm = request.form['rainfallMmHour']
-        rh = request.form['rainfallMmMinute']
-        rd = request.form['rainfallMmDay']
-        bv = request.form['batteryVoltage']
-        la = request.form['latitude']
-        lo = request.form['longitude']
+        # assert request.method == 'POST'
+        params = request.args if request.method == 'GET' else request.form
+        validate_params(params)
+        te = params['temperatureC']
+        ws = params['windspeedMs']
+        mo = params['moisture']
+        rm = params['rainfallMmHour']
+        rh = params['rainfallMmMinute']
+        rd = params['rainfallMmDay']
+        bv = params['batteryVoltage']
+        la = params['latitude']
+        lo = params['longitude']
         print('api_add SUCCESS TE=%s WS=%s MO=%s RM=%s RH=%s RD=%s BV=%s LA=%s LO=%s' % (
                 te, ws, mo, rm, rh, rd, bv, la, lo )) 
     except Exception as e:
@@ -97,9 +97,10 @@ def validate_params(params):
         messages.append("param 'did' should be 6 characters long")
         ok = False
 
-    #if calc_hmac(params) != params['hmac']:
-    #    messages.append("HMAC authentication failed")
-    #    ok = False
+    h = calc_hmac(params)
+    if h != params['hmac']:
+        messages.append("HMAC authentication failed\ngot: %s\nexp: %s" % (params['hmac'], h))
+        ok = False
 
     if not ok:
         raise Exception('; '.join(messages))
