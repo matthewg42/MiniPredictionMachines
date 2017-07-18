@@ -61,4 +61,16 @@ const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 #define TIMESTREAMS_API_PRIKEY "00000000001111111111222222222233"
 #endif
 
+// Compile time option defaults
+#ifndef THINGSPEAK_UPLOAD
+#define THINGSPEAK_UPLOAD 0
+#endif
+
+#ifndef TIMESTREAMS_UPLOAD
+#define TIMESTREAMS_UPLOAD 1
+#endif
+
+#ifndef DISPLAY_BATTERY_VOLTAGE
+#define DISPLAY_BATTERY_VOLTAGE 1
+#endif
 

@@ -199,7 +199,7 @@ void ModeWeather_::displayLastData()
         OLED.clearBuffer();               
         OLED.setFont(OLED_MESSAGE_FONT);  
         uint8_t ypos = OLED_MESSAGE_FONT_HEIGHT;
-#ifdef DISPLAY_BATTERY_VOLTAGE
+#if DISPLAY_BATTERY_VOLTAGE==1
         ypos += OLED_MESSAGE_FONT_HEIGHT;
 #else
         ypos += OLED_MESSAGE_FONT_HEIGHT*1.5;
@@ -220,7 +220,7 @@ void ModeWeather_::displayLastData()
         OLED.drawStr (70,  ypos, packet.data.moisture ? "Wet" : "Dry" );
         OLED.drawStrR(127, ypos, String(packet.data.rainFallMmHour, 2).c_str());
 
-#ifdef DISPLAY_BATTERY_VOLTAGE
+#if DISPLAY_BATTERY_VOLTAGE==1
         ypos += (OLED_MESSAGE_FONT_HEIGHT + OLED_MESSAGE_FONT_VSEP);
         OLED.drawStr (0,   ypos, "Battery (V):");
         OLED.drawStrR(127, ypos, String(packet.data.batteryVoltage, 2).c_str());
@@ -280,10 +280,10 @@ void ModeWeather_::handleWeatherData()
 {
     if (ModeRealTime.unixTime() > 0) {
         displayLastData();
-#ifdef THINGSPEAK_UPLOAD
+#if THINGSPEAK_UPLOAD==1
         uploadThingspeak();
 #endif
-#ifdef TIMESTREAMS_UPLOAD
+#if TIMESTREAMS_UPLOAD==1
         uploadTimestreams();
 #endif
     }
