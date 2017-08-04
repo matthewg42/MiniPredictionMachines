@@ -1,0 +1,2 @@
+Preset: clockwise = more sensitive
+Position of prototype: half way + 10% clockwise
