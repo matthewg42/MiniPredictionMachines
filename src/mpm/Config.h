@@ -44,15 +44,36 @@ const uint32_t PACKET_READ_TIMEOUT_MS   = 200;
 const uint8_t OLED_MESSAGE_FONT_HEIGHT  = 8;
 const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 
-#define THINGSPEAK_API_KEY          F("GED0JXRS9NWB7LYV")
+#ifndef DISPLAY_BATTERY_VOLTAGE
+#define DISPLAY_BATTERY_VOLTAGE 1
+#endif
+
+//////////////////////
+// Thingspeak settings
+//////////////////////
+// Some of these are wrapped in #ifdefs so they can be over-ridden from the Makefile using a command line -D option
 #define THINGSPEAK_URL_TEMPLATE     F("http://api.thingspeak.com/update?api_key={k}&field1={1}&field2={2}&field3={3}&field4={4}&field5={5}&field6={6}&field7={7}&field8={8}")
 
-// Should not contain trailing / - it will be added when used
-//#define API_BASE_URL                F("http://192.168.1.14:8888")
-#define API_BASE_URL                F("http://future.thepredictionmachine.org/wp-content/plugins/the-future-machine/api/v1")
+#ifndef THINGSPEAK_UPLOAD
+// Set to 1 to enable THINGSPEAK functionality, 0 to disable
+#define THINGSPEAK_UPLOAD 0
+#endif
 
-// How many parameters we might have in an API call (including hmac)
-#define HTTP_PARAMIZER_MAX_PARAMS   15
+#ifdef THINGSPEAK_API_KEY
+// Define your THINGSPEAK write API key here.  Remember, don't commit
+// API keys to git, or publish them some other way.
+#define THINGSPEAK_API_KEY          F("0000000001111111")
+#endif
+
+
+///////////////////////
+// Timestreams settings
+// ////////////////////
+// Some of these are wrapped in #ifdefs so they can be over-ridden from the Makefile using a command line -D option
+#ifndef TIMESTREAMS_UPLOAD
+// Set to 1 to enable timestreams functionality, 0 to disable
+#define TIMESTREAMS_UPLOAD 1
+#endif
 
 // You can define API key details here, but remember, live API keys should
 // not be commited to the git repo!  We wrap in an #ifdef in case we're
@@ -61,16 +82,10 @@ const uint8_t OLED_MESSAGE_FONT_VSEP    = 3;
 #define TIMESTREAMS_API_PRIKEY "00000000001111111111222222222233"
 #endif
 
-// Compile time option defaults
-#ifndef THINGSPEAK_UPLOAD
-#define THINGSPEAK_UPLOAD 0
-#endif
+// Note: should NOT contain trailing /
+#define API_BASE_URL                F("http://future.thepredictionmachine.org/wp-content/plugins/the-future-machine/api/v1")
 
-#ifndef TIMESTREAMS_UPLOAD
-#define TIMESTREAMS_UPLOAD 1
-#endif
+// How many parameters we might have in an API call (including hmac)
+#define HTTP_PARAMIZER_MAX_PARAMS   15
 
-#ifndef DISPLAY_BATTERY_VOLTAGE
-#define DISPLAY_BATTERY_VOLTAGE 1
-#endif
 
